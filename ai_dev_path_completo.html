@@ -1,0 +1,2729 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#6c63ff">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="AI Dev Path">
+  <link rel="manifest" href="manifest.json">
+  <title>AI Dev Path</title>
+  <script src="https://unpkg.com/dropbox/dist/Dropbox-sdk.min.js"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --surface: #111118;
+      --surface2: #16161f;
+      --surface3: #1c1c28;
+      --border: #ffffff0f;
+      --border2: #ffffff18;
+      --text: #e8e8f0;
+      --muted: #666680;
+      --accent: #6c63ff;
+      --accent2: #00d4aa;
+      --accent3: #ff6b6b;
+      --accent4: #ffa94d;
+      --glow: #6c63ff33;
+      --font-display: 'Syne', sans-serif;
+      --font-mono: 'Space Mono', monospace;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-display);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* GRID BG */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Install Banner */
+    .install-banner {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(108, 99, 255, 0.3);
+      display: none;
+      align-items: center;
+      gap: 1rem;
+      z-index: 1000;
+      animation: slideUp 0.3s ease;
+      max-width: 90%;
+    }
+
+    .install-banner.show {
+      display: flex;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+    }
+
+    .install-banner button {
+      background: white;
+      color: var(--accent);
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .install-banner .close-btn {
+      background: transparent;
+      color: white;
+      font-size: 1.2rem;
+      padding: 0.25rem 0.5rem;
+    }
+
+    /* NAV */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: #0a0a0fcc;
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border2);
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      gap: 0;
+      height: 60px;
+      overflow-x: auto;
+    }
+
+    .nav-logo {
+      font-size: 1rem;
+      font-weight: 800;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-right: auto;
+      font-family: var(--font-mono);
+      flex-shrink: 0;
+    }
+
+    .nav-logo span {
+      color: var(--accent2);
+    }
+
+    .nav-tabs {
+      display: flex;
+      gap: 0;
+      height: 100%;
+    }
+
+    .nav-tab {
+      height: 100%;
+      padding: 0 1.5rem;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--muted);
+      font-family: var(--font-display);
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+      white-space: nowrap;
+    }
+
+    .nav-tab:hover {
+      color: var(--text);
+    }
+
+    .nav-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    /* PAGES */
+    .page {
+      display: none;
+      position: relative;
+      z-index: 1;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    /* ===== PAGE 1: PLANO ===== */
+    .hero {
+      padding: 4rem 2rem 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .hero-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      color: var(--accent2);
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+    }
+
+    .hero h1 em {
+      font-style: normal;
+      color: transparent;
+      -webkit-text-stroke: 1px var(--accent);
+    }
+
+    .hero-meta {
+      display: flex;
+      gap: 2rem;
+      margin-top: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .hero-stat {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .hero-stat-num {
+      font-family: var(--font-mono);
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .hero-stat-label {
+      font-size: 0.72rem;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    /* PHASES GRID */
+    .phases-grid {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1rem 2rem 4rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1rem;
+    }
+
+    .phase-card {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 12px;
+      padding: 1.5rem;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .phase-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--card-accent, var(--accent));
+      opacity: 0.6;
+      transition: opacity 0.2s;
+    }
+
+    .phase-card:hover {
+      transform: translateY(-4px) scale(1.01);
+      border-color: var(--card-accent, var(--accent));
+      box-shadow: 0 20px 60px -10px var(--glow);
+    }
+
+    .phase-card:hover::before {
+      opacity: 1;
+    }
+
+    .card-phase-tag {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--card-accent, var(--accent));
+      opacity: 0.8;
+    }
+
+    .card-icon {
+      font-size: 2rem;
+      line-height: 1;
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      line-height: 1.3;
+      letter-spacing: -0.01em;
+    }
+
+    .card-subtitle {
+      font-size: 0.75rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: auto;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .card-duration {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+
+    .card-arrow {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 1px solid var(--border2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      color: var(--muted);
+      transition: all 0.2s;
+    }
+
+    .phase-card:hover .card-arrow {
+      background: var(--card-accent, var(--accent));
+      border-color: var(--card-accent, var(--accent));
+      color: #fff;
+      transform: translate(2px, -2px);
+    }
+
+    /* DETAIL VIEW */
+    .detail-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: #0a0a0fdd;
+      backdrop-filter: blur(8px);
+      padding: 2rem;
+      overflow-y: auto;
+    }
+
+    .detail-overlay.open {
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+    }
+
+    .detail-panel {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 740px;
+      margin: auto;
+      overflow: hidden;
+      animation: slideUpDetail 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes slideUpDetail {
+      from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.97);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .detail-header {
+      padding: 2rem;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+      background: linear-gradient(135deg, var(--surface2), var(--surface));
+    }
+
+    .detail-header::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--detail-accent, var(--accent));
+    }
+
+    .detail-close {
+      position: absolute;
+      top: 1.25rem;
+      right: 1.25rem;
+      width: 36px;
+      height: 36px;
+      background: var(--surface3);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+
+    .detail-close:hover {
+      background: var(--border2);
+      color: var(--text);
+    }
+
+    .detail-tag {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--detail-accent, var(--accent));
+      margin-bottom: 0.75rem;
+    }
+
+    .detail-title {
+      font-size: 1.8rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+
+    .detail-meta {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .detail-badge {
+      background: var(--surface3);
+      border: 1px solid var(--border2);
+      border-radius: 6px;
+      padding: 0.3rem 0.7rem;
+      font-size: 0.72rem;
+      color: var(--muted);
+      font-family: var(--font-mono);
+    }
+
+    .detail-body {
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .detail-section-title {
+      font-size: 0.7rem;
+      font-family: var(--font-mono);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .detail-section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .topic-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .topic-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.6rem 0.75rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      line-height: 1.5;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      transition: border-color 0.15s;
+    }
+
+    .topic-item:hover {
+      border-color: var(--border2);
+    }
+
+    .topic-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--detail-accent, var(--accent));
+      margin-top: 0.45rem;
+      flex-shrink: 0;
+    }
+
+    .resource-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .resource-chip {
+      background: var(--surface3);
+      border: 1px solid var(--border2);
+      border-radius: 20px;
+      padding: 0.35rem 0.9rem;
+      font-size: 0.75rem;
+      color: var(--text);
+      transition: all 0.15s;
+    }
+
+    .resource-chip:hover {
+      border-color: var(--detail-accent, var(--accent));
+      color: var(--detail-accent, var(--accent));
+    }
+
+    .project-box {
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-left: 3px solid var(--detail-accent, var(--accent));
+      border-radius: 0 8px 8px 0;
+      padding: 1rem 1.2rem;
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* ===== PAGE 2: ROADMAP ===== */
+    .roadmap-container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 3rem 2rem 4rem;
+    }
+
+    .page-header {
+      margin-bottom: 2.5rem;
+    }
+
+    .page-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent2);
+      margin-bottom: 0.75rem;
+    }
+
+    .page-title {
+      font-size: 2.2rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+    }
+
+    .page-title em {
+      font-style: normal;
+      color: var(--accent);
+    }
+
+    .roadmap-phase {
+      margin-bottom: 2.5rem;
+      position: relative;
+    }
+
+    .roadmap-phase-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .phase-number {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 2px solid var(--phase-color, var(--accent));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--phase-color, var(--accent));
+      flex-shrink: 0;
+    }
+
+    .phase-name {
+      font-size: 1rem;
+      font-weight: 700;
+      flex: 1;
+    }
+
+    .phase-toggle {
+      font-size: 0.7rem;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      transition: transform 0.2s;
+    }
+
+    .roadmap-phase.collapsed .phase-toggle {
+      transform: rotate(-90deg);
+    }
+
+    .phase-progress-bar {
+      height: 4px;
+      background: var(--surface3);
+      border-radius: 99px;
+      overflow: hidden;
+      margin-top: 0.5rem;
+    }
+
+    .phase-progress-fill {
+      height: 100%;
+      background: var(--phase-color, var(--accent));
+      border-radius: 99px;
+      transition: width 0.5s ease;
+    }
+
+    .roadmap-items {
+      padding-left: 2.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      border-left: 1px dashed var(--border2);
+      margin-left: 1.1rem;
+    }
+
+    .roadmap-phase.collapsed .roadmap-items {
+      display: none;
+    }
+
+    .roadmap-item {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .roadmap-item-header {
+      padding: 0.9rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      cursor: default;
+    }
+
+    .item-status {
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      border: 1.5px solid var(--border2);
+      cursor: pointer;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.6rem;
+      transition: all 0.15s;
+    }
+
+    .item-status.done {
+      background: var(--accent2);
+      border-color: var(--accent2);
+      color: #fff;
+    }
+
+    .item-title {
+      flex: 1;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .item-expand-btn {
+      background: none;
+      border: 1px solid var(--border2);
+      border-radius: 6px;
+      padding: 0.25rem 0.6rem;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+
+    .item-expand-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .roadmap-item-body {
+      display: none;
+      padding: 0 1rem 1rem;
+      border-top: 1px solid var(--border);
+      padding-top: 1rem;
+    }
+
+    .roadmap-item-body.open {
+      display: block;
+    }
+
+    .notes-area {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 0.75rem;
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      line-height: 1.6;
+      resize: vertical;
+      min-height: 80px;
+      transition: border-color 0.15s;
+      outline: none;
+    }
+
+    .notes-area:focus {
+      border-color: var(--accent);
+    }
+
+    .notes-area::placeholder {
+      color: var(--muted);
+    }
+
+    .attach-area {
+      margin-top: 0.5rem;
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .attach-btn {
+      background: var(--surface3);
+      border: 1px dashed var(--border2);
+      border-radius: 7px;
+      padding: 0.4rem 0.8rem;
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .attach-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .file-input {
+      display: none;
+    }
+
+    .attached-files {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+
+    .file-chip {
+      background: var(--surface3);
+      border: 1px solid var(--border2);
+      border-radius: 5px;
+      padding: 0.2rem 0.6rem;
+      font-size: 0.68rem;
+      font-family: var(--font-mono);
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .file-chip-remove {
+      cursor: pointer;
+      color: var(--accent3);
+      font-size: 0.7rem;
+      line-height: 1;
+    }
+
+    /* ===== PAGE 3: PROGRESSO ===== */
+    .progress-container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 3rem 2rem 4rem;
+    }
+
+    .progress-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .prog-card {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 12px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+
+    .prog-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--prog-color, var(--accent));
+    }
+
+    .prog-card:hover {
+      border-color: var(--prog-color, var(--accent));
+    }
+
+    .prog-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .prog-card-icon {
+      font-size: 1.6rem;
+      line-height: 1;
+    }
+
+    .prog-percent {
+      font-family: var(--font-mono);
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--prog-color, var(--accent));
+    }
+
+    .prog-card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .prog-card-sub {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .progress-bar-track {
+      width: 100%;
+      height: 6px;
+      background: var(--surface3);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      background: var(--prog-color, var(--accent));
+      transition: width 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+    }
+
+    .progress-bar-fill::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--prog-color, var(--accent));
+      box-shadow: 0 0 8px var(--prog-color, var(--accent));
+    }
+
+    .prog-notes {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 0.7rem;
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      line-height: 1.6;
+      resize: vertical;
+      min-height: 70px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .prog-notes:focus {
+      border-color: var(--prog-color, var(--accent));
+    }
+
+    .prog-notes::placeholder {
+      color: var(--muted);
+    }
+
+    .prog-milestones {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .milestone {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .milestone-check {
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      border: 1.5px solid var(--border2);
+      cursor: pointer;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.6rem;
+      transition: all 0.15s;
+    }
+
+    .milestone-check.checked {
+      background: var(--prog-color, var(--accent));
+      border-color: var(--prog-color, var(--accent));
+      color: #fff;
+    }
+
+    .milestone.done-label {
+      color: var(--text);
+      text-decoration: line-through;
+      opacity: 0.5;
+    }
+
+    /* OVERALL PROGRESS */
+    .overall-bar {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .overall-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .overall-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-family: var(--font-mono);
+      color: var(--muted);
+    }
+
+    .overall-percent {
+      font-family: var(--font-mono);
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--accent2);
+    }
+
+    .overall-track {
+      height: 8px;
+      background: var(--surface3);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .overall-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      border-radius: 99px;
+      transition: width 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    /* Notes History */
+    .notes-section {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .notes-history {
+      max-height: 200px;
+      overflow-y: auto;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .notes-history:empty::before {
+      content: 'Nenhuma anotação ainda...';
+      color: var(--muted);
+      font-size: 0.7rem;
+      font-family: var(--font-mono);
+    }
+
+    .note-entry {
+      background: var(--surface3);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.6rem;
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      line-height: 1.5;
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+    }
+
+    .note-content {
+      flex: 1;
+    }
+
+    .note-timestamp {
+      color: var(--accent2);
+      font-size: 0.65rem;
+      margin-bottom: 0.3rem;
+      display: block;
+    }
+
+    .note-text {
+      color: var(--text);
+    }
+
+    .note-remove {
+      cursor: pointer;
+      color: var(--accent3);
+      font-size: 0.75rem;
+      padding: 0.2rem 0.4rem;
+      margin-left: 0.5rem;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+    }
+
+    .note-remove:hover {
+      opacity: 1;
+    }
+
+    .notes-input-container {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .notes-input {
+      flex: 1;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 0.5rem 0.7rem;
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .notes-input:focus {
+      border-color: var(--accent);
+    }
+
+    .notes-add-btn {
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      color: #fff;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+
+    .notes-add-btn:hover {
+      background: var(--accent2);
+    }
+
+    /* Attachments History */
+    .attachments-section {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .attachments-history {
+      max-height: 150px;
+      overflow-y: auto;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .attachments-history:empty::before {
+      content: 'Nenhum arquivo anexado...';
+      color: var(--muted);
+      font-size: 0.7rem;
+      font-family: var(--font-mono);
+    }
+
+    .attachment-entry {
+      background: var(--surface3);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.5rem;
+      font-size: 0.7rem;
+      font-family: var(--font-mono);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .attachment-info {
+      flex: 1;
+    }
+
+    .attachment-timestamp {
+      color: var(--accent2);
+      font-size: 0.62rem;
+      display: block;
+      margin-bottom: 0.2rem;
+    }
+
+    .attachment-name {
+      color: var(--text);
+    }
+
+    .attachment-remove {
+      cursor: pointer;
+      color: var(--accent3);
+      font-size: 0.75rem;
+      padding: 0.2rem 0.4rem;
+    }
+
+    .attachment-remove:hover {
+      color: var(--accent3);
+      opacity: 0.8;
+    }
+
+    /* ===== PAGE 4: MINHA ÁREA ===== */
+    .practice-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 3rem 2rem 4rem;
+    }
+
+    .practice-tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .practice-tab {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 0.75rem 1.5rem;
+      color: var(--muted);
+      font-family: var(--font-display);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .practice-tab:hover {
+      color: var(--text);
+      border-color: var(--accent);
+    }
+
+    .practice-tab.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    .practice-panel {
+      display: none;
+    }
+
+    .practice-panel.active {
+      display: block;
+    }
+
+    /* Math Calculator */
+    .calc-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1rem;
+    }
+
+    .calc-section {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+
+    .calc-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--accent2);
+      margin-bottom: 1rem;
+    }
+
+    .calc-input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .calc-label {
+      font-size: 0.7rem;
+      font-family: var(--font-mono);
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .calc-input {
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 0.5rem 0.75rem;
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .calc-input:focus {
+      border-color: var(--accent);
+    }
+
+    .calc-btn {
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      padding: 0.6rem 1rem;
+      color: #fff;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.15s;
+      margin-top: 0.5rem;
+    }
+
+    .calc-btn:hover {
+      background: var(--accent2);
+    }
+
+    .calc-result {
+      background: var(--surface3);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--accent2);
+      min-height: 60px;
+    }
+
+    /* Neural Network Visualizer */
+    .nn-container {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+
+    .code-editor {
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .code-textarea {
+      width: 100%;
+      background: var(--surface3);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1rem;
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      line-height: 1.6;
+      resize: vertical;
+      min-height: 300px;
+      outline: none;
+    }
+
+    .code-textarea:focus {
+      border-color: var(--accent);
+    }
+
+    .code-controls {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .run-btn {
+      background: var(--accent2);
+      border: none;
+      border-radius: 8px;
+      padding: 0.6rem 1.5rem;
+      color: #fff;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .run-btn:hover {
+      background: var(--accent);
+    }
+
+    .clear-btn {
+      background: var(--surface3);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 0.6rem 1.5rem;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .clear-btn:hover {
+      border-color: var(--accent3);
+      color: var(--accent3);
+    }
+
+    #nn-canvas {
+      width: 100%;
+      max-width: 800px;
+      height: 400px;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      margin-top: 1rem;
+    }
+
+    .output-panel {
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text);
+      min-height: 100px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .output-panel:empty::before {
+      content: 'Saída do código aparecerá aqui...';
+      color: var(--muted);
+    }
+
+    /* SCROLLBAR */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border2);
+      border-radius: 99px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--muted);
+    }
+
+    /* Mobile Responsiveness */
+    @media (max-width: 768px) {
+      nav {
+        padding: 0 1rem;
+      }
+
+      .nav-tab {
+        padding: 0 0.75rem;
+        font-size: 0.7rem;
+      }
+
+      .hero {
+        padding: 2rem 1rem 1rem;
+      }
+
+      .phases-grid,
+      .roadmap-container,
+      .progress-container,
+      .practice-container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+      }
+
+      .progress-grid,
+      .calc-grid {
+        grid-template-columns: 1fr;
+      }
+
+      #nn-canvas {
+        height: 300px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Install Banner -->
+  <div class="install-banner" id="install-banner">
+    <span>📱 Instale o app para acesso offline!</span>
+    <button id="install-btn">Instalar</button>
+    <button class="close-btn" id="close-banner">✕</button>
+  </div>
+
+  <nav>
+    <div class="nav-logo">AI<span>Dev</span>Path</div>
+    <div class="nav-tabs">
+      <button class="nav-tab active" onclick="switchTab(0)">Trilha</button>
+      <button class="nav-tab" onclick="switchTab(1)">Roadmap</button>
+      <button class="nav-tab" onclick="switchTab(2)">Progresso</button>
+      <button class="nav-tab" onclick="switchTab(3)">Prática</button>
+    </div>
+    <button id="sync-btn" class="nav-tab"
+      style="color: var(--accent2); margin-left: 1rem; border: 1px solid var(--border2); border-radius: 8px; height: 36px; padding: 0 1rem;"
+      onclick="handleSync()">☁ Sincronizar</button>
+  </nav>
+
+  <!-- ===== PAGE 1: PLANO ===== -->
+  <div class="page active" id="page-0">
+    <div class="hero">
+      <p class="hero-eyebrow">// Trilha de aprendizado</p>
+      <h1>Inteligência Artificial<br>& <em>Dev de Software</em></h1>
+      <div class="hero-meta">
+        <div class="hero-stat">
+          <span class="hero-stat-num">18–24</span>
+          <span class="hero-stat-label">meses estimados</span>
+        </div>
+        <div class="hero-stat">
+          <span class="hero-stat-num">4</span>
+          <span class="hero-stat-label">grandes fases</span>
+        </div>
+        <div class="hero-stat">
+          <span class="hero-stat-num">1–2h</span>
+          <span class="hero-stat-label">por dia</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="phases-grid" id="phases-grid"></div>
+  </div>
+
+  <!-- ===== PAGE 2: ROADMAP ===== -->
+  <div class="page" id="page-1">
+    <div class="roadmap-container">
+      <div class="page-header">
+        <p class="page-eyebrow">// Acompanhamento</p>
+        <h2 class="page-title">Seu <em>Roadmap</em></h2>
+      </div>
+
+      <!-- Overall Progress for Roadmap -->
+      <div class="overall-bar">
+        <div class="overall-header">
+          <span class="overall-title">Progresso do Roadmap</span>
+          <span class="overall-percent" id="roadmap-pct">0%</span>
+        </div>
+        <div class="overall-track">
+          <div class="overall-fill" id="roadmap-fill" style="width:0%"></div>
+        </div>
+      </div>
+
+      <div id="roadmap-content"></div>
+    </div>
+  </div>
+
+  <!-- ===== PAGE 3: PROGRESSO ===== -->
+  <div class="page" id="page-2">
+    <div class="progress-container">
+      <div class="page-header">
+        <p class="page-eyebrow">// Dashboard</p>
+        <h2 class="page-title">Meu <em>Progresso</em></h2>
+      </div>
+
+      <div class="overall-bar">
+        <div class="overall-header">
+          <span class="overall-title">Progresso Geral</span>
+          <span class="overall-percent" id="overall-pct">0%</span>
+        </div>
+        <div class="overall-track">
+          <div class="overall-fill" id="overall-fill" style="width:0%"></div>
+        </div>
+      </div>
+
+      <div class="progress-grid" id="progress-grid">
+
+        <!-- CARD 1 -->
+        <div class="prog-card" style="--prog-color: #1AD4A4" data-card-id="card1">
+          <div class="prog-card-top">
+            <span class="prog-card-icon">🐍</span>
+            <span class="prog-percent">0%</span>
+          </div>
+          <div>
+            <div class="prog-card-title">Python Fundamentos</div>
+            <div class="prog-card-sub">Fase 1 · Linguagem principal</div>
+          </div>
+          <div class="progress-bar-track">
+            <div class="progress-bar-fill" style="width:0%"></div>
+          </div>
+          <div class="prog-milestones">
+            <div class="milestone">
+              <span class="milestone-check"></span>
+              Variáveis e tipos de dados
+            </div>
+            <div class="milestone">
+              <span class="milestone-check"></span>
+              Funções e controle de fluxo
+            </div>
+            <div class="milestone">
+              <span class="milestone-check"></span>
+              Orientação a Objetos
+            </div>
+            <div class="milestone">
+              <span class="milestone-check"></span>
+              Manipulação de arquivos
+            </div>
+          </div>
+
+          <div class="notes-section">
+            <div class="notes-history" data-notes-id="card1-notes"></div>
+            <div class="notes-input-container">
+              <input type="text" class="notes-input" placeholder="Adicionar anotação..." data-input-id="card1">
+              <button class="notes-add-btn" onclick="addNote('card1')">Adicionar</button>
+            </div>
+          </div>
+
+          <div class="attachments-section">
+            <div class="attachments-history" data-attachments-id="card1-attachments"></div>
+            <label class="attach-btn">
+              📎 Anexar arquivo
+              <input type="file" class="file-input" multiple onchange="handleAttachment(this, 'card1')">
+            </label>
+          </div>
+        </div>
+
+        <!-- CARD 2 -->
+        <div class="prog-card" style="--prog-color: #6c63ff" data-card-id="card2">
+          <div class="prog-card-top">
+            <span class="prog-card-icon">📐</span>
+            <span class="prog-percent">0%</span>
+          </div>
+          <div>
+            <div class="prog-card-title">Matemática para IA</div>
+            <div class="prog-card-sub">Fase 2 · Álgebra Linear + Cálculo</div>
+          </div>
+          <div class="progress-bar-track">
+            <div class="progress-bar-fill" style="width:0%"></div>
+          </div>
+          <div class="prog-milestones">
+            <div class="milestone">
+              <span class="milestone-check"></span>
+              Vetores e matrizes
+            </div>
+            <div class="milestone">
+              <span class="milestone-check"></span>
+              Derivadas e gradiente
+            </div>
+            <div class="milestone">
+              <span class="milestone-check"></span>
+              Probabilidade e Bayes
+            </div>
+          </div>
+
+          <div class="notes-section">
+            <div class="notes-history" data-notes-id="card2-notes"></div>
+            <div class="notes-input-container">
+              <input type="text" class="notes-input" placeholder="Adicionar anotação..." data-input-id="card2">
+              <button class="notes-add-btn" onclick="addNote('card2')">Adicionar</button>
+            </div>
+          </div>
+
+          <div class="attachments-section">
+            <div class="attachments-history" data-attachments-id="card2-attachments"></div>
+            <label class="attach-btn">
+              📎 Anexar arquivo
+              <input type="file" class="file-input" multiple onchange="handleAttachment(this, 'card2')">
+            </label>
+          </div>
+        </div>
+
+        <!-- CARD 3 -->
+        <div class="prog-card" style="--prog-color: #ffa94d" data-card-id="card3">
+          <div class="prog-card-top">
+            <span class="prog-card-icon">🏗️</span>
+            <span class="prog-percent">0%</span>
+          </div>
+          <div>
+            <div class="prog-card-title">Estruturas de Dados</div>
+            <div class="prog-card-sub">Fase 3 · Algoritmos</div>
+          </div>
+          <div class="progress-bar-track">
+            <div class="progress-bar-fill" style="width:0%"></div>
+          </div>
+          <div class="prog-milestones">
+            <div class="milestone">
+              <span class="milestone-check"></span>
+              Arrays e listas ligadas
+            </div>
+            <div class="milestone">
+              <span class="milestone-check"></span>
+              Árvores e grafos
+            </div>
+            <div class="milestone">
+              <span class="milestone-check"></span>
+              Big-O notation
+            </div>
+          </div>
+
+          <div class="notes-section">
+            <div class="notes-history" data-notes-id="card3-notes"></div>
+            <div class="notes-input-container">
+              <input type="text" class="notes-input" placeholder="Adicionar anotação..." data-input-id="card3">
+              <button class="notes-add-btn" onclick="addNote('card3')">Adicionar</button>
+            </div>
+          </div>
+
+          <div class="attachments-section">
+            <div class="attachments-history" data-attachments-id="card3-attachments"></div>
+            <label class="attach-btn">
+              📎 Anexar arquivo
+              <input type="file" class="file-input" multiple onchange="handleAttachment(this, 'card3')">
+            </label>
+          </div>
+        </div>
+
+        <!-- CARD 4 -->
+        <div class="prog-card" style="--prog-color: #ff6b6b" data-card-id="card4">
+          <div class="prog-card-top">
+            <span class="prog-card-icon">🤖</span>
+            <span class="prog-percent">0%</span>
+          </div>
+          <div>
+            <div class="prog-card-title">(Preencha como quiser)</div>
+            <div class="prog-card-sub">Fase - · Preencha como quiser</div>
+          </div>
+          <div class="progress-bar-track">
+            <div class="progress-bar-fill" style="width:0%"></div>
+          </div>
+          <div class="prog-milestones">
+            <div class="milestone">
+              <span class="milestone-check"></span>
+              Milestone 1
+            </div>
+            <div class="milestone">
+              <span class="milestone-check"></span>
+              Milestone 2
+            </div>
+            <div class="milestone">
+              <span class="milestone-check"></span>
+              Milestone 3
+            </div>
+          </div>
+
+          <div class="notes-section">
+            <div class="notes-history" data-notes-id="card4-notes"></div>
+            <div class="notes-input-container">
+              <input type="text" class="notes-input" placeholder="Adicionar anotação..." data-input-id="card4">
+              <button class="notes-add-btn" onclick="addNote('card4')">Adicionar</button>
+            </div>
+          </div>
+
+          <div class="attachments-section">
+            <div class="attachments-history" data-attachments-id="card4-attachments"></div>
+            <label class="attach-btn">
+              📎 Anexar arquivo
+              <input type="file" class="file-input" multiple onchange="handleAttachment(this, 'card4')">
+            </label>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PAGE 4: MINHA ÁREA ===== -->
+  <div class="page" id="page-3">
+    <div class="practice-container">
+      <div class="page-header">
+        <p class="page-eyebrow">// Prática</p>
+        <h2 class="page-title">Minha <em>Área de Estudos</em></h2>
+      </div>
+
+      <div class="practice-tabs">
+        <button class="practice-tab active" onclick="switchPracticeTab(0)">🧮 Calculadora Matemática</button>
+        <button class="practice-tab" onclick="switchPracticeTab(1)">🧠 Simulador de Rede Neural</button>
+      </div>
+
+      <!-- Math Calculator Panel -->
+      <div class="practice-panel active" id="practice-0">
+        <div class="calc-grid">
+          <!-- Vector Operations -->
+          <div class="calc-section">
+            <div class="calc-title">Operações com Vetores</div>
+            <div class="calc-input-group">
+              <label class="calc-label">Vetor A (separado por vírgula)</label>
+              <input type="text" class="calc-input" id="vectorA" placeholder="Ex: 1, 2, 3">
+            </div>
+            <div class="calc-input-group">
+              <label class="calc-label">Vetor B (separado por vírgula)</label>
+              <input type="text" class="calc-input" id="vectorB" placeholder="Ex: 4, 5, 6">
+            </div>
+            <button class="calc-btn" onclick="calculateVectorOps()">Calcular Operações</button>
+            <div class="calc-result" id="vector-result">Resultado aparecerá aqui...</div>
+          </div>
+
+          <!-- Matrix Operations -->
+          <div class="calc-section">
+            <div class="calc-title">Operações com Matrizes</div>
+            <div class="calc-input-group">
+              <label class="calc-label">Matriz A (linhas separadas por ;)</label>
+              <input type="text" class="calc-input" id="matrixA" placeholder="Ex: 1,2; 3,4">
+            </div>
+            <div class="calc-input-group">
+              <label class="calc-label">Matriz B (linhas separadas por ;)</label>
+              <input type="text" class="calc-input" id="matrixB" placeholder="Ex: 5,6; 7,8">
+            </div>
+            <button class="calc-btn" onclick="calculateMatrixOps()">Calcular Operações</button>
+            <div class="calc-result" id="matrix-result">Resultado aparecerá aqui...</div>
+          </div>
+
+          <!-- Dot Product & Cross Product -->
+          <div class="calc-section">
+            <div class="calc-title">Produto Escalar & Vetorial</div>
+            <div class="calc-input-group">
+              <label class="calc-label">Vetor U</label>
+              <input type="text" class="calc-input" id="vectorU" placeholder="Ex: 1, 2, 3">
+            </div>
+            <div class="calc-input-group">
+              <label class="calc-label">Vetor V</label>
+              <input type="text" class="calc-input" id="vectorV" placeholder="Ex: 4, 5, 6">
+            </div>
+            <button class="calc-btn" onclick="calculateProducts()">Calcular Produtos</button>
+            <div class="calc-result" id="product-result">Resultado aparecerá aqui...</div>
+          </div>
+
+          <!-- Linear Algebra -->
+          <div class="calc-section">
+            <div class="calc-title">Álgebra Linear</div>
+            <div class="calc-input-group">
+              <label class="calc-label">Matriz (linhas separadas por ;)</label>
+              <input type="text" class="calc-input" id="matrixDet" placeholder="Ex: 1,2; 3,4">
+            </div>
+            <button class="calc-btn" onclick="calculateLinearAlgebra()">Calcular Determinante e Transposta</button>
+            <div class="calc-result" id="linear-result">Resultado aparecerá aqui...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Neural Network Panel -->
+      <div class="practice-panel" id="practice-1">
+        <div class="nn-container">
+          <div class="calc-title">💡 Simulador de Rede Neural Simples</div>
+          <p style="color: var(--muted); font-size: 0.8rem; margin-bottom: 1rem;">
+            Experimente com diferentes arquiteturas de redes neurais! Use a função <code
+              style="color: var(--accent2);">createNeuralNetwork()</code>
+            para visualizar sua rede.
+          </p>
+
+          <div class="code-editor">
+            <textarea class="code-textarea" id="nn-code">// Exemplo de rede neural simples
+// Camadas: [entradas, ocultas, saídas]
+
+function createNeuralNetwork() {
+  const network = {
+    layers: [3, 5, 2],  // 3 entradas, 5 neurônios ocultos, 2 saídas
+    name: "Rede de Classificação"
+  };
+  return network;
+}
+
+// Execute para visualizar!
+const myNetwork = createNeuralNetwork();
+console.log("Rede criada:", myNetwork.name);
+console.log("Arquitetura:", myNetwork.layers.join(" → "));
+</textarea>
+          </div>
+
+          <div class="code-controls">
+            <button class="run-btn" onclick="runNeuralNetwork()">▶ Executar e Visualizar</button>
+            <button class="clear-btn" onclick="clearNNOutput()">Limpar Saída</button>
+          </div>
+
+          <canvas id="nn-canvas"></canvas>
+          <div class="output-panel" id="nn-output"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DETAIL OVERLAY -->
+  <div class="detail-overlay" id="detail-overlay" onclick="handleOverlayClick(event)">
+    <div class="detail-panel" id="detail-panel">
+      <div class="detail-header">
+        <button class="detail-close" onclick="closeDetail()">✕</button>
+        <div class="detail-tag" id="d-tag"></div>
+        <div class="detail-title" id="d-title"></div>
+        <div class="detail-meta" id="d-meta"></div>
+      </div>
+      <div class="detail-body" id="d-body"></div>
+    </div>
+  </div>
+
+  <script>
+    // ===================== PWA INSTALL =====================
+    let deferredPrompt;
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      document.getElementById('install-banner').classList.add('show');
+    });
+
+    document.getElementById('install-btn').addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log(`User response: ${outcome}`);
+        deferredPrompt = null;
+        document.getElementById('install-banner').classList.remove('show');
+      }
+    });
+
+    document.getElementById('close-banner').addEventListener('click', () => {
+      document.getElementById('install-banner').classList.remove('show');
+    });
+
+    // ===================== DATA =====================
+    const phases = [
+      {
+        id: 1,
+        tag: "Fase 01 · Fundamentos",
+        icon: "🌱",
+        title: "Lógica & Python",
+        subtitle: "Base sólida em programação, raciocínio algorítmico e matemática essencial para IA.",
+        duration: "3–4 meses",
+        color: "#1AD4A4",
+        topics: [
+          { section: "Lógica de Programação", items: ["Algoritmos e pensamento computacional", "Condicionais, laços e funções", "Estruturas básicas de dados"] },
+          { section: "Python", items: ["Tipos, listas, dicionários, sets", "OOP: classes, herança, polimorfismo", "Bibliotecas: os, json, re, datetime"] },
+          { section: "Matemática para IA", items: ["Álgebra Linear: vetores e matrizes", "Cálculo: derivadas e gradiente", "Estatística e probabilidade"] }
+        ],
+        resources: ["CS50 (Harvard/edX)", "Curso em Vídeo", "Khan Academy", "3Blue1Brown", "Livro: Entendendo Algoritmos"],
+        project: "Script Python para automatizar tarefas do dia a dia (renomear arquivos, processar CSVs, fazer scraping básico)."
+      },
+      {
+        id: 2,
+        tag: "Fase 02 · Desenvolvimento",
+        icon: "⚙️",
+        title: "Engenharia de Software",
+        subtitle: "Práticas modernas de desenvolvimento: APIs, bancos de dados, testes e boas práticas.",
+        duration: "4–5 meses",
+        color: "#6c63ff",
+        topics: [
+          { section: "Algoritmos & Complexidade", items: ["Busca e ordenação (BFS, DFS, QuickSort)", "Árvores, grafos, heap", "Notação Big-O e análise de complexidade"] },
+          { section: "Banco de Dados", items: ["SQL avançado: JOINs, índices, subconsultas", "PostgreSQL e MongoDB na prática", "ORM com SQLAlchemy"] },
+          { section: "APIs & Web", items: ["REST com FastAPI / Flask", "Autenticação JWT e OAuth2", "Documentação OpenAPI/Swagger"] },
+          { section: "Boas Práticas", items: ["Git, GitHub, pull requests, code review", "Clean Code, SOLID, Design Patterns", "Testes com pytest e TDD básico", "Docker e docker-compose"] }
+        ],
+        resources: ["LeetCode (easy/medium)", "SQLZoo", "FastAPI Docs", "Livro: Clean Code", "Pro Git (gratuito)"],
+        project: "API REST completa com autenticação, banco PostgreSQL e testes automatizados — publicada no GitHub."
+      },
+      {
+        id: 3,
+        tag: "Fase 03 · Inteligência Artificial",
+        icon: "🧠",
+        title: "Machine Learning & IA",
+        subtitle: "Do ML clássico ao deep learning, NLP e visão computacional com projetos práticos.",
+        duration: "5–6 meses",
+        color: "#ffa94d",
+        topics: [
+          { section: "Machine Learning Clássico", items: ["Supervisionado, não-supervisionado, RL", "Regressão, KNN, SVM, Random Forest", "Métricas: F1, ROC-AUC, RMSE", "Overfitting, validação cruzada, regularização"] },
+          { section: "Análise de Dados", items: ["NumPy e álgebra linear numérica", "Pandas: manipulação e limpeza de dados", "Visualização: Matplotlib, Seaborn, Plotly", "Feature engineering"] },
+          { section: "Deep Learning", items: ["Redes neurais, backpropagation", "PyTorch: tensores, autograd, módulos", "CNNs para visão computacional", "RNNs e LSTMs para séries temporais"] },
+          { section: "NLP", items: ["Tokenização, embeddings, TF-IDF", "BERT e Transformers via Hugging Face", "Pipeline de NLP com spaCy"] }
+        ],
+        resources: ["Curso ML Andrew Ng (Coursera)", "Fast.ai (gratuito)", "Hugging Face docs", "Livro: Hands-On ML (Géron)", "Kaggle datasets"],
+        project: "Pipeline de ML completo: análise exploratória + modelo preditivo + classificador de sentimentos em avaliações de produtos."
+      },
+      {
+        id: 4,
+        tag: "Fase 04 · Avançado",
+        icon: "🚀",
+        title: "LLMs & MLOps",
+        subtitle: "Modelos de linguagem, agentes autônomos, fine-tuning e deploy de modelos em produção.",
+        duration: "4–6 meses",
+        color: "#ff6b6b",
+        topics: [
+          { section: "Large Language Models", items: ["Arquitetura Transformer e atenção", "GPT, BERT, LLaMA: diferenças e usos", "Prompt Engineering: zero/few-shot, CoT", "RAG: LLMs + bases de conhecimento", "Fine-tuning com LoRA/QLoRA"] },
+          { section: "Agentes de IA", items: ["LangChain, LlamaIndex, CrewAI", "Tools, plugins e APIs externas", "Multi-agent systems", "Avaliação e guardrails"] },
+          { section: "MLOps & Deploy", items: ["Versionamento: MLflow, W&B", "Docker + Kubernetes básico", "APIs de ML com FastAPI + Gunicorn", "Cloud: AWS SageMaker / Google Vertex AI", "Monitoramento: data drift, degradação"] },
+          { section: "Tópicos Avançados (escolha)", items: ["Visão: YOLO, modelos de difusão", "Reinforcement Learning: PPO, Gymnasium", "Graph Neural Networks", "IA Responsável: SHAP, LIME, fairness"] }
+        ],
+        resources: ["Paper: Attention Is All You Need", "DeepLearning.AI (LLM courses)", "LangChain docs", "Livro: Designing ML Systems (Huyen)", "Made With ML (Mohandas)"],
+        project: "Agente autônomo com RAG que pesquisa na web, resume documentos e responde perguntas — deployado como API pública."
+      }
+    ];
+
+    // ===================== RENDER PHASE CARDS =====================
+    const grid = document.getElementById('phases-grid');
+
+    phases.forEach(p => {
+      const card = document.createElement('div');
+      card.className = 'phase-card';
+      card.style.setProperty('--card-accent', p.color);
+      card.innerHTML = `
+    <div class="card-phase-tag">${p.tag}</div>
+    <div class="card-icon">${p.icon}</div>
+    <div class="card-title">${p.title}</div>
+    <div class="card-subtitle">${p.subtitle}</div>
+    <div class="card-footer">
+      <span class="card-duration">⏱ ${p.duration}</span>
+      <span class="card-arrow">→</span>
+    </div>
+  `;
+      card.addEventListener('click', () => openDetail(p));
+      grid.appendChild(card);
+    });
+
+    // ===================== DETAIL MODAL =====================
+    function openDetail(p) {
+      document.getElementById('detail-overlay').style.setProperty('--detail-accent', p.color);
+      document.getElementById('detail-overlay').classList.add('open');
+      document.getElementById('d-tag').textContent = p.tag;
+      document.getElementById('d-title').textContent = p.icon + ' ' + p.title;
+      document.getElementById('d-meta').innerHTML = `
+    <span class="detail-badge">⏱ ${p.duration}</span>
+    <span class="detail-badge">📚 ${p.resources.length} recursos</span>
+    <span class="detail-badge">🛠 Projeto incluído</span>
+  `;
+      let bodyHTML = '';
+      p.topics.forEach(t => {
+        bodyHTML += `<div>
+      <div class="detail-section-title">${t.section}</div>
+      <div class="topic-list">
+        ${t.items.map(i => `<div class="topic-item"><span class="topic-dot"></span>${i}</div>`).join('')}
+      </div>
+    </div>`;
+      });
+      bodyHTML += `<div>
+    <div class="detail-section-title">Recursos Recomendados</div>
+    <div class="resource-chips">${p.resources.map(r => `<span class="resource-chip">${r}</span>`).join('')}</div>
+  </div>
+  <div>
+    <div class="detail-section-title">Projeto Prático</div>
+    <div class="project-box">🛠 ${p.project}</div>
+  </div>`;
+      document.getElementById('d-body').innerHTML = bodyHTML;
+    }
+
+    function closeDetail() {
+      document.getElementById('detail-overlay').classList.remove('open');
+    }
+
+    function handleOverlayClick(e) {
+      if (e.target === document.getElementById('detail-overlay')) closeDetail();
+    }
+
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail(); });
+
+    // ===================== RENDER ROADMAP =====================
+    const roadmapContent = document.getElementById('roadmap-content');
+    const phaseColors = ["#1AD4A4", "#6c63ff", "#ffa94d", "#ff6b6b"];
+
+    phases.forEach((p, pi) => {
+      const pDiv = document.createElement('div');
+      pDiv.className = 'roadmap-phase';
+      pDiv.style.setProperty('--phase-color', phaseColors[pi]);
+      pDiv.dataset.phaseIndex = pi;
+
+      const topics = p.topics.flatMap(t => t.items.map(i => ({ section: t.section, label: i })));
+
+      pDiv.innerHTML = `
+    <div class="roadmap-phase-header" onclick="togglePhase(this)">
+      <div class="phase-number" style="--phase-color:${phaseColors[pi]}">${pi + 1}</div>
+      <div class="phase-name">${p.icon} ${p.title} <span style="color:var(--muted);font-weight:400;font-size:0.8rem">· ${p.duration}</span></div>
+      <div class="phase-toggle">▾</div>
+    </div>
+    <div class="phase-progress-bar">
+      <div class="phase-progress-fill" style="width:0%; background:${phaseColors[pi]}"></div>
+    </div>
+    <div class="roadmap-items">
+      ${topics.map((t, ti) => `
+        <div class="roadmap-item" data-phase="${pi}" data-item="${ti}">
+          <div class="roadmap-item-header">
+            <div class="item-status" onclick="toggleStatus(this, event)" title="Marcar como feito"></div>
+            <div class="item-title">${t.label}</div>
+            <button class="item-expand-btn" onclick="toggleItemBody(this, event)">+ notas</button>
+          </div>
+          <div class="roadmap-item-body">
+            <textarea class="notes-area" placeholder="Anotações sobre '${t.label}'..."></textarea>
+            <div class="attach-area">
+              <label class="attach-btn">
+                📎 Anexar arquivo
+                <input type="file" class="file-input" multiple onchange="handleFiles(this)">
+              </label>
+              <div class="attached-files" id="files-${pi}-${ti}"></div>
+            </div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+      roadmapContent.appendChild(pDiv);
+    });
+
+    function togglePhase(header) {
+      header.parentElement.classList.toggle('collapsed');
+    }
+
+    function toggleStatus(el, e) {
+      e.stopPropagation();
+      el.classList.toggle('done');
+      el.textContent = el.classList.contains('done') ? '✓' : '';
+
+      // Update phase progress
+      const item = el.closest('.roadmap-item');
+      const phase = el.closest('.roadmap-phase');
+      updatePhaseProgress(phase);
+      updateRoadmapProgress();
+
+      // Save state
+      saveRoadmapState();
+    }
+
+    function updatePhaseProgress(phaseElement) {
+      const items = phaseElement.querySelectorAll('.item-status');
+      const doneItems = phaseElement.querySelectorAll('.item-status.done');
+      const percentage = items.length > 0 ? Math.round((doneItems.length / items.length) * 100) : 0;
+
+      const progressBar = phaseElement.querySelector('.phase-progress-fill');
+      progressBar.style.width = percentage + '%';
+    }
+
+    function updateRoadmapProgress() {
+      const allPhases = document.querySelectorAll('.roadmap-phase');
+      let totalPercentage = 0;
+
+      allPhases.forEach(phase => {
+        const items = phase.querySelectorAll('.item-status');
+        const doneItems = phase.querySelectorAll('.item-status.done');
+        const phasePercentage = items.length > 0 ? (doneItems.length / items.length) * 100 : 0;
+        totalPercentage += phasePercentage;
+      });
+
+      const avg = allPhases.length > 0 ? Math.round(totalPercentage / allPhases.length) : 0;
+      document.getElementById('roadmap-pct').textContent = avg + '%';
+      document.getElementById('roadmap-fill').style.width = avg + '%';
+    }
+
+    function saveRoadmapState() {
+      const state = {};
+      document.querySelectorAll('.roadmap-item').forEach(item => {
+        const phase = item.dataset.phase;
+        const itemIndex = item.dataset.item;
+        const key = `roadmap-${phase}-${itemIndex}`;
+        const isDone = item.querySelector('.item-status').classList.contains('done');
+        state[key] = isDone;
+      });
+      localStorage.setItem('roadmap-state', JSON.stringify(state));
+    }
+
+    function loadRoadmapState() {
+      const saved = localStorage.getItem('roadmap-state');
+      if (saved) {
+        const state = JSON.parse(saved);
+        Object.keys(state).forEach(key => {
+          if (state[key]) {
+            const [, phase, item] = key.split('-');
+            const itemEl = document.querySelector(`.roadmap-item[data-phase="${phase}"][data-item="${item}"]`);
+            if (itemEl) {
+              const status = itemEl.querySelector('.item-status');
+              status.classList.add('done');
+              status.textContent = '✓';
+            }
+          }
+        });
+
+        // Update all phase progress bars
+        document.querySelectorAll('.roadmap-phase').forEach(updatePhaseProgress);
+        updateRoadmapProgress();
+      }
+    }
+
+    function toggleItemBody(btn, e) {
+      e.stopPropagation();
+      const body = btn.closest('.roadmap-item').querySelector('.roadmap-item-body');
+      body.classList.toggle('open');
+      btn.textContent = body.classList.contains('open') ? '− fechar' : '+ notas';
+    }
+
+    function handleFiles(input) {
+      const container = input.closest('.attach-area').querySelector('.attached-files');
+      Array.from(input.files).forEach(file => {
+        const chip = document.createElement('div');
+        chip.className = 'file-chip';
+        chip.innerHTML = `📄 ${file.name} <span class="file-chip-remove" onclick="this.parentElement.remove()">✕</span>`;
+        container.appendChild(chip);
+      });
+      input.value = '';
+    }
+
+    // ===================== PROGRESS / MILESTONES =====================
+    function initProgressCards() {
+      document.querySelectorAll('.prog-card').forEach(card => {
+        const cardId = card.dataset.cardId;
+        const checkboxes = card.querySelectorAll('.milestone-check');
+        const percentDisplay = card.querySelector('.prog-percent');
+        const progressBar = card.querySelector('.progress-bar-fill');
+
+        loadCardState(cardId, checkboxes);
+
+        checkboxes.forEach((check, index) => {
+          check.addEventListener('click', function () {
+            this.classList.toggle('checked');
+            this.textContent = this.classList.contains('checked') ? '✓' : '';
+
+            saveCardState(cardId, checkboxes);
+            updateCardProgress(card, checkboxes, percentDisplay, progressBar);
+            updateOverallProgress();
+          });
+        });
+
+        updateCardProgress(card, checkboxes, percentDisplay, progressBar);
+      });
+
+      updateOverallProgress();
+      loadAllNotes();
+      loadAllAttachments();
+    }
+
+    function updateCardProgress(card, checkboxes, percentDisplay, progressBar) {
+      const total = checkboxes.length;
+      const checked = Array.from(checkboxes).filter(cb => cb.classList.contains('checked')).length;
+      const percentage = total > 0 ? Math.round((checked / total) * 100) : 0;
+
+      percentDisplay.textContent = percentage + '%';
+      progressBar.style.width = percentage + '%';
+      card.dataset.progress = percentage;
+    }
+
+    function saveCardState(cardId, checkboxes) {
+      const state = Array.from(checkboxes).map(cb => cb.classList.contains('checked'));
+      localStorage.setItem(`progress-${cardId}`, JSON.stringify(state));
+    }
+
+    function loadCardState(cardId, checkboxes) {
+      const saved = localStorage.getItem(`progress-${cardId}`);
+      if (saved) {
+        const state = JSON.parse(saved);
+        checkboxes.forEach((cb, i) => {
+          if (state[i]) {
+            cb.classList.add('checked');
+            cb.textContent = '✓';
+          }
+        });
+      }
+    }
+
+    function updateOverallProgress() {
+      const allCards = document.querySelectorAll('.prog-card');
+      let total = 0;
+      allCards.forEach(card => total += parseInt(card.dataset.progress || 0));
+      const avg = allCards.length > 0 ? Math.round(total / allCards.length) : 0;
+      document.getElementById('overall-pct').textContent = avg + '%';
+      document.getElementById('overall-fill').style.width = avg + '%';
+    }
+
+    // ===================== NOTES MANAGEMENT =====================
+    function addNote(cardId) {
+      const input = document.querySelector(`[data-input-id="${cardId}"]`);
+      const text = input.value.trim();
+
+      if (!text) return;
+
+      const timestamp = new Date().toLocaleString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+
+      const note = {
+        text: text,
+        timestamp: timestamp,
+        id: Date.now()
+      };
+
+      const notesJson = localStorage.getItem(`notes-${cardId}`);
+      const notes = notesJson ? JSON.parse(notesJson) : [];
+      notes.push(note);
+      localStorage.setItem(`notes-${cardId}`, JSON.stringify(notes));
+
+      displayNotes(cardId);
+      input.value = '';
+    }
+
+    function removeNote(cardId, noteId) {
+      const notesJson = localStorage.getItem(`notes-${cardId}`);
+      let notes = notesJson ? JSON.parse(notesJson) : [];
+      notes = notes.filter(n => n.id !== noteId);
+      localStorage.setItem(`notes-${cardId}`, JSON.stringify(notes));
+      displayNotes(cardId);
+    }
+
+    function displayNotes(cardId) {
+      const container = document.querySelector(`[data-notes-id="${cardId}-notes"]`);
+      const notesJson = localStorage.getItem(`notes-${cardId}`);
+      const notes = notesJson ? JSON.parse(notesJson) : [];
+
+      container.innerHTML = notes.slice().reverse().map(note => `
+        <div class="note-entry">
+          <div class="note-content">
+            <span class="note-timestamp">${note.timestamp}</span>
+            <div class="note-text">${note.text}</div>
+          </div>
+          <span class="note-remove" onclick="removeNote('${cardId}', ${note.id})">✕</span>
+        </div>
+      `).join('');
+    }
+
+    function loadAllNotes() {
+      ['card1', 'card2', 'card3', 'card4'].forEach(cardId => {
+        displayNotes(cardId);
+      });
+    }
+
+    document.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter' && e.target.classList.contains('notes-input')) {
+        const cardId = e.target.dataset.inputId;
+        addNote(cardId);
+      }
+    });
+
+    // ===================== ATTACHMENTS MANAGEMENT =====================
+    function handleAttachment(input, cardId) {
+      const files = Array.from(input.files);
+
+      if (files.length === 0) return;
+
+      const timestamp = new Date().toLocaleString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+
+      const attachmentsJson = localStorage.getItem(`attachments-${cardId}`);
+      const attachments = attachmentsJson ? JSON.parse(attachmentsJson) : [];
+
+      files.forEach(file => {
+        const attachment = {
+          name: file.name,
+          timestamp: timestamp,
+          id: Date.now() + Math.random()
+        };
+        attachments.push(attachment);
+      });
+
+      localStorage.setItem(`attachments-${cardId}`, JSON.stringify(attachments));
+
+      displayAttachments(cardId);
+      input.value = '';
+    }
+
+    function displayAttachments(cardId) {
+      const container = document.querySelector(`[data-attachments-id="${cardId}-attachments"]`);
+      const attachmentsJson = localStorage.getItem(`attachments-${cardId}`);
+      const attachments = attachmentsJson ? JSON.parse(attachmentsJson) : [];
+
+      container.innerHTML = attachments.slice().reverse().map(attachment => `
+        <div class="attachment-entry">
+          <div class="attachment-info">
+            <span class="attachment-timestamp">${attachment.timestamp}</span>
+            <div class="attachment-name">📄 ${attachment.name}</div>
+          </div>
+          <span class="attachment-remove" onclick="removeAttachment('${cardId}', ${attachment.id})">✕</span>
+        </div>
+      `).join('');
+    }
+
+    function removeAttachment(cardId, attachmentId) {
+      const attachmentsJson = localStorage.getItem(`attachments-${cardId}`);
+      let attachments = attachmentsJson ? JSON.parse(attachmentsJson) : [];
+      attachments = attachments.filter(a => a.id !== attachmentId);
+      localStorage.setItem(`attachments-${cardId}`, JSON.stringify(attachments));
+      displayAttachments(cardId);
+    }
+
+    function loadAllAttachments() {
+      ['card1', 'card2', 'card3', 'card4'].forEach(cardId => {
+        displayAttachments(cardId);
+      });
+    }
+
+    // ===================== MATH CALCULATOR =====================
+    function parseVector(str) {
+      return str.split(',').map(x => parseFloat(x.trim())).filter(x => !isNaN(x));
+    }
+
+    function parseMatrix(str) {
+      return str.split(';').map(row =>
+        row.split(',').map(x => parseFloat(x.trim())).filter(x => !isNaN(x))
+      ).filter(row => row.length > 0);
+    }
+
+    function calculateVectorOps() {
+      const vecA = parseVector(document.getElementById('vectorA').value);
+      const vecB = parseVector(document.getElementById('vectorB').value);
+      const result = document.getElementById('vector-result');
+
+      if (vecA.length === 0 || vecB.length === 0) {
+        result.textContent = 'Erro: Digite vetores válidos';
+        return;
+      }
+
+      if (vecA.length !== vecB.length) {
+        result.textContent = 'Erro: Vetores devem ter a mesma dimensão';
+        return;
+      }
+
+      const sum = vecA.map((v, i) => v + vecB[i]);
+      const diff = vecA.map((v, i) => v - vecB[i]);
+      const magA = Math.sqrt(vecA.reduce((acc, v) => acc + v * v, 0)).toFixed(2);
+      const magB = Math.sqrt(vecB.reduce((acc, v) => acc + v * v, 0)).toFixed(2);
+
+      result.innerHTML = `
+        <strong>Soma (A + B):</strong> [${sum.join(', ')}]<br>
+        <strong>Subtração (A - B):</strong> [${diff.join(', ')}]<br>
+        <strong>Magnitude |A|:</strong> ${magA}<br>
+        <strong>Magnitude |B|:</strong> ${magB}
+      `;
+    }
+
+    function calculateMatrixOps() {
+      const matA = parseMatrix(document.getElementById('matrixA').value);
+      const matB = parseMatrix(document.getElementById('matrixB').value);
+      const result = document.getElementById('matrix-result');
+
+      if (matA.length === 0 || matB.length === 0) {
+        result.textContent = 'Erro: Digite matrizes válidas';
+        return;
+      }
+
+      if (matA.length !== matB.length || matA[0].length !== matB[0].length) {
+        result.textContent = 'Erro: Matrizes devem ter as mesmas dimensões';
+        return;
+      }
+
+      const sum = matA.map((row, i) => row.map((val, j) => val + matB[i][j]));
+      const diff = matA.map((row, i) => row.map((val, j) => val - matB[i][j]));
+
+      result.innerHTML = `
+        <strong>Soma (A + B):</strong><br>${sum.map(row => '[' + row.join(', ') + ']').join('<br>')}<br><br>
+        <strong>Subtração (A - B):</strong><br>${diff.map(row => '[' + row.join(', ') + ']').join('<br>')}
+      `;
+    }
+
+    function calculateProducts() {
+      const vecU = parseVector(document.getElementById('vectorU').value);
+      const vecV = parseVector(document.getElementById('vectorV').value);
+      const result = document.getElementById('product-result');
+
+      if (vecU.length === 0 || vecV.length === 0) {
+        result.textContent = 'Erro: Digite vetores válidos';
+        return;
+      }
+
+      if (vecU.length !== vecV.length) {
+        result.textContent = 'Erro: Vetores devem ter a mesma dimensão';
+        return;
+      }
+
+      const dot = vecU.reduce((acc, v, i) => acc + v * vecV[i], 0);
+
+      let crossMsg = '';
+      if (vecU.length === 3 && vecV.length === 3) {
+        const cross = [
+          vecU[1] * vecV[2] - vecU[2] * vecV[1],
+          vecU[2] * vecV[0] - vecU[0] * vecV[2],
+          vecU[0] * vecV[1] - vecU[1] * vecV[0]
+        ];
+        crossMsg = `<br><strong>Produto Vetorial (U × V):</strong> [${cross.map(v => v.toFixed(2)).join(', ')}]`;
+      }
+
+      result.innerHTML = `
+        <strong>Produto Escalar (U · V):</strong> ${dot.toFixed(2)}${crossMsg}
+      `;
+    }
+
+    function calculateLinearAlgebra() {
+      const mat = parseMatrix(document.getElementById('matrixDet').value);
+      const result = document.getElementById('linear-result');
+
+      if (mat.length === 0) {
+        result.textContent = 'Erro: Digite uma matriz válida';
+        return;
+      }
+
+      // Transpose
+      const transpose = mat[0].map((_, colIndex) => mat.map(row => row[colIndex]));
+
+      // Determinant (only for 2x2)
+      let detMsg = '';
+      if (mat.length === 2 && mat[0].length === 2) {
+        const det = mat[0][0] * mat[1][1] - mat[0][1] * mat[1][0];
+        detMsg = `<strong>Determinante:</strong> ${det.toFixed(2)}<br><br>`;
+      }
+
+      result.innerHTML = `
+        ${detMsg}
+        <strong>Transposta:</strong><br>${transpose.map(row => '[' + row.join(', ') + ']').join('<br>')}
+      `;
+    }
+
+    // ===================== NEURAL NETWORK VISUALIZER =====================
+    function runNeuralNetwork() {
+      const code = document.getElementById('nn-code').value;
+      const output = document.getElementById('nn-output');
+      const canvas = document.getElementById('nn-canvas');
+
+      output.innerHTML = '';
+
+      // Override console.log
+      const logs = [];
+      const originalLog = console.log;
+      console.log = function (...args) {
+        logs.push(args.join(' '));
+        originalLog.apply(console, args);
+      };
+
+      try {
+        // Execute code
+        eval(code);
+
+        // Display logs
+        if (logs.length > 0) {
+          output.innerHTML = logs.map(log => `<div>${log}</div>`).join('');
+        }
+
+        // Try to get network
+        let network = null;
+        try {
+          network = eval('createNeuralNetwork()');
+        } catch (e) {
+          // Network function might not exist
+        }
+
+        if (network && network.layers && Array.isArray(network.layers)) {
+          drawNeuralNetwork(canvas, network);
+        }
+
+      } catch (error) {
+        output.innerHTML = `<div style="color: var(--accent3);">❌ Erro: ${error.message}</div>`;
+      } finally {
+        console.log = originalLog;
+      }
+    }
+
+    function drawNeuralNetwork(canvas, network) {
+      const ctx = canvas.getContext('2d');
+      const width = canvas.width = canvas.offsetWidth;
+      const height = canvas.height = canvas.offsetHeight;
+
+      ctx.clearRect(0, 0, width, height);
+
+      const layers = network.layers;
+      const maxNeurons = Math.max(...layers);
+      const layerSpacing = width / (layers.length + 1);
+      const neuronRadius = 12;
+
+      // Draw connections
+      ctx.strokeStyle = '#ffffff18';
+      ctx.lineWidth = 1;
+
+      for (let l = 0; l < layers.length - 1; l++) {
+        const currentLayer = layers[l];
+        const nextLayer = layers[l + 1];
+        const x1 = layerSpacing * (l + 1);
+        const x2 = layerSpacing * (l + 2);
+
+        for (let i = 0; i < currentLayer; i++) {
+          const y1 = (height / (currentLayer + 1)) * (i + 1);
+
+          for (let j = 0; j < nextLayer; j++) {
+            const y2 = (height / (nextLayer + 1)) * (j + 1);
+
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
+          }
+        }
+      }
+
+      // Draw neurons
+      const colors = ['#1AD4A4', '#6c63ff', '#ffa94d', '#ff6b6b'];
+
+      layers.forEach((layerSize, layerIndex) => {
+        const x = layerSpacing * (layerIndex + 1);
+        const color = colors[layerIndex % colors.length];
+
+        for (let i = 0; i < layerSize; i++) {
+          const y = (height / (layerSize + 1)) * (i + 1);
+
+          // Neuron circle
+          ctx.beginPath();
+          ctx.arc(x, y, neuronRadius, 0, 2 * Math.PI);
+          ctx.fillStyle = color;
+          ctx.fill();
+          ctx.strokeStyle = color;
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        }
+
+        // Layer label
+        ctx.fillStyle = '#e8e8f0';
+        ctx.font = '12px Space Mono';
+        ctx.textAlign = 'center';
+        const label = layerIndex === 0 ? 'Entrada' :
+          layerIndex === layers.length - 1 ? 'Saída' :
+            `Oculta ${layerIndex}`;
+        ctx.fillText(`${label} (${layerSize})`, x, height - 10);
+      });
+    }
+
+    function clearNNOutput() {
+      document.getElementById('nn-output').innerHTML = '';
+      const canvas = document.getElementById('nn-canvas');
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    // ===================== TAB SWITCH =====================
+    function switchTab(idx) {
+      document.querySelectorAll('.page').forEach((p, i) => {
+        p.classList.toggle('active', i === idx);
+      });
+      document.querySelectorAll('.nav-tab').forEach((t, i) => {
+        t.classList.toggle('active', i === idx);
+      });
+      if (idx === 2) {
+        setTimeout(() => {
+          updateOverallProgress();
+        }, 100);
+      }
+    }
+
+    function switchPracticeTab(idx) {
+      document.querySelectorAll('.practice-panel').forEach((p, i) => {
+        p.classList.toggle('active', i === idx);
+      });
+      document.querySelectorAll('.practice-tab').forEach((t, i) => {
+        t.classList.toggle('active', i === idx);
+      });
+    }
+
+    // ===================== INIT =====================
+    initProgressCards();
+    loadRoadmapState();
+
+    // ===================== PWA & SYNC =====================
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('SW Registered'))
+          .catch(err => console.log('SW Registration Failed', err));
+      });
+    }
+
+    const DROPBOX_APP_KEY = 'SUA_APP_KEY_AQUI'; // USUÁRIO: SUBSTITUA PELA SUA APP KEY
+    let dbx;
+
+    async function handleSync() {
+      // Verificações Iniciais
+      if (window.location.protocol === 'file:') {
+        alert("⚠️ ATENÇÃO: Você está abrindo o arquivo diretamente (file://).\n\nAlgumas funcionalidades (como Sync e PWA) podem ser bloqueadas pelo navegador por segurança. Recomenda-se usar um servidor local (ex: Extensão Live Server do VS Code).");
+      }
+
+      if (typeof Dropbox === 'undefined') {
+        alert("❌ Erro: O SDK do Dropbox não foi carregado. Verifique sua conexão com a internet.");
+        return;
+      }
+
+      if (!dbx) {
+        let token = prompt("Insira seu Access Token do Dropbox:");
+        if (!token) return;
+        token = token.trim();
+        dbx = new Dropbox.Dropbox({ accessToken: token });
+      }
+
+      const syncBtn = document.getElementById('sync-btn');
+      syncBtn.textContent = '⌛ Conectando...';
+
+      try {
+        const state = {};
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          state[key] = localStorage.getItem(key);
+        }
+
+        const blob = new Blob([JSON.stringify(state)], { type: 'application/json' });
+
+        try {
+          const download = await dbx.filesDownload({ path: '/ai_dev_path_db.json' });
+          const cloudState = JSON.parse(await download.result.fileBlob.text());
+
+          if (confirm("Dados encontrados! Deseja baixar o progresso da nuvem?\n\nOK: Baixar da Nuvem (Substitui local)\nCancelar: Sobrescrever Nuvem com dados locais")) {
+            Object.keys(cloudState).forEach(key => localStorage.setItem(key, cloudState[key]));
+            alert("Sucesso! Recarregando...");
+            location.reload();
+            return;
+          }
+        } catch (e) {
+          // 409 Path Not Found é esperado na primeira vez
+          if (e.status !== 409 && e.status !== 404) {
+             console.error("Erro no Download:", e);
+             if (e.status === 401 || e.status === 400) throw e;
+          }
+        }
+
+        await dbx.filesUpload({
+          path: '/ai_dev_path_db.json',
+          contents: blob,
+          mode: 'overwrite'
+        });
+
+        alert("✅ Sincronizado com sucesso!");
+      } catch (error) {
+        console.error("ERRO COMPLETO:", error);
+        
+        let detail = "Erro desconhecido";
+        if (error.error && typeof error.error === 'string') detail = error.error;
+        else if (error.error && error.error.error_summary) detail = error.error.error_summary;
+        else if (error.message) detail = error.message;
+
+        alert(`❌ Falha na Sincronização\n\nStatus: ${error.status || 'N/A'}\nDetalhe: ${detail}\n\nVerifique se o Token está correto e se o App no Dropbox tem permissão 'files.content.write'.`);
+        dbx = null;
+      } finally {
+        syncBtn.textContent = '☁ Sincronizar';
+      }
+    }
+  </script>
+</body>
+
+</html>

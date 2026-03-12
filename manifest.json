@@ -1,0 +1,17 @@
+{
+  "name": "AI Dev Path",
+  "short_name": "AIDevPath",
+  "description": "Trilha de aprendizado para Inteligência Artificial e Desenvolvimento de Software.",
+  "start_url": "./ai_dev_path_completo.html",
+  "display": "standalone",
+  "background_color": "#0a0a0f",
+  "theme_color": "#6c63ff",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2103/2103633.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
