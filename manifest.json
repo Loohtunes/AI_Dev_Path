@@ -2,7 +2,7 @@
   "name": "AI Dev Path",
   "short_name": "AIDevPath",
   "description": "Trilha de aprendizado para Inteligência Artificial e Desenvolvimento de Software.",
-  "start_url": "./ai_dev_path_completo.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0a0a0f",
   "theme_color": "#6c63ff",
