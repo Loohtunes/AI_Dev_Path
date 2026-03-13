@@ -10,7 +10,6 @@
   <meta name="apple-mobile-web-app-title" content="AI Dev Path">
   <link rel="manifest" href="manifest.json">
   <title>AI Dev Path</title>
-  <script src="https://unpkg.com/dropbox/dist/Dropbox-sdk.min.js"></script>
   <link
     href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap"
     rel="stylesheet">
@@ -1443,6 +1442,443 @@
       background: var(--muted);
     }
 
+    /* ===== PAGE 5: CHAMADOS ELIANA ===== */
+    .tickets-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 3rem 2rem 4rem;
+    }
+
+    .tickets-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .new-ticket-btn {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border: none;
+      border-radius: 10px;
+      padding: 0.75rem 1.5rem;
+      color: #fff;
+      font-family: var(--font-display);
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 15px rgba(108, 99, 255, 0.3);
+    }
+
+    .new-ticket-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(108, 99, 255, 0.4);
+    }
+
+    .tickets-board {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .ticket-card {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 12px;
+      padding: 1.5rem;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .ticket-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--ticket-color, var(--accent));
+    }
+
+    .ticket-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      border-color: var(--ticket-color, var(--accent));
+    }
+
+    .ticket-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      gap: 0.5rem;
+    }
+
+    .ticket-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+      flex: 1;
+      line-height: 1.3;
+    }
+
+    .ticket-actions {
+      display: flex;
+      gap: 0.5rem;
+      flex-shrink: 0;
+    }
+
+    .ticket-edit-btn,
+    .ticket-delete-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      border: 1px solid var(--border2);
+      background: var(--surface2);
+      color: var(--muted);
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+
+    .ticket-edit-btn:hover {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    .ticket-delete-btn:hover {
+      background: var(--accent3);
+      color: #fff;
+      border-color: var(--accent3);
+    }
+
+    .ticket-description {
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    .ticket-meta {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      font-size: 0.7rem;
+      font-family: var(--font-mono);
+      color: var(--muted);
+      padding-top: 0.5rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .ticket-date {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .ticket-attachments {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-top: 0.5rem;
+    }
+
+    .ticket-attachment-chip {
+      background: var(--surface3);
+      border: 1px solid var(--border2);
+      border-radius: 5px;
+      padding: 0.3rem 0.6rem;
+      font-size: 0.68rem;
+      font-family: var(--font-mono);
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--muted);
+    }
+
+    .empty-state-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.3;
+    }
+
+    .empty-state-text {
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .empty-state-hint {
+      font-size: 0.85rem;
+      opacity: 0.7;
+    }
+
+    /* Ticket Modal */
+    .ticket-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: #0a0a0fdd;
+      backdrop-filter: blur(8px);
+      padding: 2rem;
+      overflow-y: auto;
+      align-items: flex-start;
+      justify-content: center;
+    }
+
+    .ticket-modal.open {
+      display: flex;
+    }
+
+    .ticket-modal-content {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 600px;
+      margin: auto;
+      overflow: hidden;
+      animation: slideUpDetail 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .ticket-modal-header {
+      padding: 2rem;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+      background: linear-gradient(135deg, var(--surface2), var(--surface));
+    }
+
+    .ticket-modal-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .ticket-modal-close {
+      position: absolute;
+      top: 1.25rem;
+      right: 1.25rem;
+      width: 36px;
+      height: 36px;
+      background: var(--surface3);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+
+    .ticket-modal-close:hover {
+      background: var(--border2);
+      color: var(--text);
+    }
+
+    .ticket-modal-body {
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .ticket-form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .ticket-form-label {
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+    }
+
+    .ticket-form-input {
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 0.75rem;
+      color: var(--text);
+      font-family: var(--font-display);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .ticket-form-input:focus {
+      border-color: var(--accent);
+    }
+
+    .ticket-form-textarea {
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 0.75rem;
+      color: var(--text);
+      font-family: var(--font-display);
+      font-size: 0.9rem;
+      line-height: 1.6;
+      resize: vertical;
+      min-height: 120px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .ticket-form-textarea:focus {
+      border-color: var(--accent);
+    }
+
+    .color-picker {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .color-option {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: all 0.15s;
+      position: relative;
+    }
+
+    .color-option:hover {
+      transform: scale(1.1);
+    }
+
+    .color-option.selected {
+      border-color: var(--text);
+      box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--text);
+    }
+
+    .color-option.selected::after {
+      content: '✓';
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 700;
+      font-size: 1.2rem;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .ticket-form-file {
+      background: var(--surface2);
+      border: 1px dashed var(--border2);
+      border-radius: 8px;
+      padding: 1rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .ticket-form-file:hover {
+      border-color: var(--accent);
+      background: var(--surface3);
+    }
+
+    .ticket-form-file input {
+      display: none;
+    }
+
+    .file-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .file-item {
+      background: var(--surface3);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.5rem 0.75rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8rem;
+      font-family: var(--font-mono);
+    }
+
+    .file-remove {
+      color: var(--accent3);
+      cursor: pointer;
+      font-size: 0.9rem;
+      padding: 0.2rem 0.4rem;
+    }
+
+    .file-remove:hover {
+      opacity: 0.7;
+    }
+
+    .ticket-modal-footer {
+      padding: 1.5rem 2rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+    }
+
+    .btn-cancel {
+      background: var(--surface3);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 0.75rem 1.5rem;
+      color: var(--muted);
+      font-family: var(--font-display);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn-cancel:hover {
+      background: var(--border2);
+      color: var(--text);
+    }
+
+    .btn-save {
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      padding: 0.75rem 1.5rem;
+      color: #fff;
+      font-family: var(--font-display);
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn-save:hover {
+      background: var(--accent2);
+    }
+
     /* Mobile Responsiveness */
     @media (max-width: 768px) {
       nav {
@@ -1461,13 +1897,18 @@
       .phases-grid,
       .roadmap-container,
       .progress-container,
-      .practice-container {
+      .practice-container,
+      .tickets-container {
         padding-left: 1rem;
         padding-right: 1rem;
       }
 
       .progress-grid,
       .calc-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .tickets-board {
         grid-template-columns: 1fr;
       }
 
@@ -1489,14 +1930,12 @@
   <nav>
     <div class="nav-logo">AI<span>Dev</span>Path</div>
     <div class="nav-tabs">
-      <button class="nav-tab active" onclick="switchTab(0)">Trilha</button>
+      <button class="nav-tab active" onclick="switchTab(0)">Plano</button>
       <button class="nav-tab" onclick="switchTab(1)">Roadmap</button>
       <button class="nav-tab" onclick="switchTab(2)">Progresso</button>
-      <button class="nav-tab" onclick="switchTab(3)">Prática</button>
+      <button class="nav-tab" onclick="switchTab(3)">Minha Área</button>
+      <button class="nav-tab" onclick="switchTab(4)">Chamados Eliana</button>
     </div>
-    <button id="sync-btn" class="nav-tab"
-      style="color: var(--accent2); margin-left: 1rem; border: 1px solid var(--border2); border-radius: 8px; height: 36px; padding: 0 1rem;"
-      onclick="handleSync()">☁ Sincronizar</button>
   </nav>
 
   <!-- ===== PAGE 1: PLANO ===== -->
@@ -1869,6 +2308,85 @@ console.log("Arquitetura:", myNetwork.layers.join(" → "));
     </div>
   </div>
 
+  <!-- ===== PAGE 5: CHAMADOS ELIANA ===== -->
+  <div class="page" id="page-4">
+    <div class="tickets-container">
+      <div class="page-header">
+        <p class="page-eyebrow">// Gestão de Chamados</p>
+        <h2 class="page-title">Chamados <em>Eliana</em></h2>
+      </div>
+
+      <div class="tickets-header">
+        <div style="flex: 1;">
+          <p style="color: var(--muted); font-size: 0.85rem;">Organize e acompanhe seus chamados</p>
+        </div>
+        <button class="new-ticket-btn" onclick="openTicketModal()">+ Novo Chamado</button>
+      </div>
+
+      <div class="tickets-board" id="tickets-board">
+        <!-- Tickets will be rendered here -->
+      </div>
+
+      <div class="empty-state" id="empty-state" style="display: none;">
+        <div class="empty-state-icon">📋</div>
+        <div class="empty-state-text">Nenhum chamado ainda</div>
+        <div class="empty-state-hint">Clique em "Novo Chamado" para começar</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TICKET MODAL -->
+  <div class="ticket-modal" id="ticket-modal" onclick="handleTicketModalClick(event)">
+    <div class="ticket-modal-content" id="ticket-modal-content">
+      <div class="ticket-modal-header">
+        <div class="ticket-modal-title" id="modal-title">Novo Chamado</div>
+        <button class="ticket-modal-close" onclick="closeTicketModal()">✕</button>
+      </div>
+
+      <div class="ticket-modal-body">
+        <div class="ticket-form-group">
+          <label class="ticket-form-label">Título</label>
+          <input type="text" class="ticket-form-input" id="ticket-title-input"
+            placeholder="Ex: Problema no sistema de login">
+        </div>
+
+        <div class="ticket-form-group">
+          <label class="ticket-form-label">Descrição</label>
+          <textarea class="ticket-form-textarea" id="ticket-description-input"
+            placeholder="Descreva o chamado em detalhes..."></textarea>
+        </div>
+
+        <div class="ticket-form-group">
+          <label class="ticket-form-label">Cor do Card</label>
+          <div class="color-picker" id="color-picker">
+            <div class="color-option selected" style="background: #6c63ff;" data-color="#6c63ff"></div>
+            <div class="color-option" style="background: #00d4aa;" data-color="#00d4aa"></div>
+            <div class="color-option" style="background: #ffa94d;" data-color="#ffa94d"></div>
+            <div class="color-option" style="background: #ff6b6b;" data-color="#ff6b6b"></div>
+            <div class="color-option" style="background: #1AD4A4;" data-color="#1AD4A4"></div>
+            <div class="color-option" style="background: #a78bfa;" data-color="#a78bfa"></div>
+            <div class="color-option" style="background: #f472b6;" data-color="#f472b6"></div>
+            <div class="color-option" style="background: #60a5fa;" data-color="#60a5fa"></div>
+          </div>
+        </div>
+
+        <div class="ticket-form-group">
+          <label class="ticket-form-label">Anexos</label>
+          <label class="ticket-form-file">
+            <input type="file" id="ticket-files-input" multiple onchange="handleTicketFiles(this)">
+            <div>📎 Clique para anexar arquivos</div>
+          </label>
+          <div class="file-list" id="ticket-files-list"></div>
+        </div>
+      </div>
+
+      <div class="ticket-modal-footer">
+        <button class="btn-cancel" onclick="closeTicketModal()">Cancelar</button>
+        <button class="btn-save" onclick="saveTicket()">Salvar Chamado</button>
+      </div>
+    </div>
+  </div>
+
   <!-- DETAIL OVERLAY -->
   <div class="detail-overlay" id="detail-overlay" onclick="handleOverlayClick(event)">
     <div class="detail-panel" id="detail-panel">
@@ -2037,7 +2555,12 @@ console.log("Arquitetura:", myNetwork.layers.join(" → "));
       if (e.target === document.getElementById('detail-overlay')) closeDetail();
     }
 
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail(); });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        closeDetail();
+        closeTicketModal();
+      }
+    });
 
     // ===================== RENDER ROADMAP =====================
     const roadmapContent = document.getElementById('roadmap-content');
@@ -2627,6 +3150,9 @@ console.log("Arquitetura:", myNetwork.layers.join(" → "));
           updateOverallProgress();
         }, 100);
       }
+      if (idx === 4) {
+        renderTickets();
+      }
     }
 
     function switchPracticeTab(idx) {
@@ -2638,91 +3164,230 @@ console.log("Arquitetura:", myNetwork.layers.join(" → "));
       });
     }
 
-    // ===================== INIT =====================
-    initProgressCards();
-    loadRoadmapState();
+    // ===================== TICKETS MANAGEMENT =====================
+    let tickets = [];
+    let editingTicketId = null;
+    let ticketFiles = [];
+    let selectedColor = '#6c63ff';
 
-    // ===================== PWA & SYNC =====================
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-          .then(reg => console.log('SW Registered'))
-          .catch(err => console.log('SW Registration Failed', err));
-      });
+    function loadTickets() {
+      const saved = localStorage.getItem('tickets-eliana');
+      if (saved) {
+        tickets = JSON.parse(saved);
+      }
+      renderTickets();
     }
 
-    const DROPBOX_APP_KEY = 'SUA_APP_KEY_AQUI'; // USUÁRIO: SUBSTITUA PELA SUA APP KEY
-    let dbx;
+    function saveTickets() {
+      localStorage.setItem('tickets-eliana', JSON.stringify(tickets));
+      renderTickets();
+    }
 
-    async function handleSync() {
-      // Verificações Iniciais
-      if (window.location.protocol === 'file:') {
-        alert("⚠️ ATENÇÃO: Você está abrindo o arquivo diretamente (file://).\n\nAlgumas funcionalidades (como Sync e PWA) podem ser bloqueadas pelo navegador por segurança. Recomenda-se usar um servidor local (ex: Extensão Live Server do VS Code).");
-      }
+    function renderTickets() {
+      const board = document.getElementById('tickets-board');
+      const emptyState = document.getElementById('empty-state');
 
-      if (typeof Dropbox === 'undefined') {
-        alert("❌ Erro: O SDK do Dropbox não foi carregado. Verifique sua conexão com a internet.");
+      if (tickets.length === 0) {
+        board.style.display = 'none';
+        emptyState.style.display = 'block';
         return;
       }
 
-      if (!dbx) {
-        let token = prompt("Insira seu Access Token do Dropbox:");
-        if (!token) return;
-        token = token.trim();
-        dbx = new Dropbox.Dropbox({ accessToken: token });
+      board.style.display = 'grid';
+      emptyState.style.display = 'none';
+
+      board.innerHTML = tickets.map(ticket => `
+        <div class="ticket-card" style="--ticket-color: ${ticket.color}">
+          <div class="ticket-header">
+            <div class="ticket-title">${ticket.title}</div>
+            <div class="ticket-actions">
+              <button class="ticket-edit-btn" onclick="editTicket('${ticket.id}')" title="Editar">✎</button>
+              <button class="ticket-delete-btn" onclick="deleteTicket('${ticket.id}')" title="Excluir">✕</button>
+            </div>
+          </div>
+          
+          ${ticket.description ? `<div class="ticket-description">${ticket.description}</div>` : ''}
+          
+          ${ticket.attachments && ticket.attachments.length > 0 ? `
+            <div class="ticket-attachments">
+              ${ticket.attachments.map(file => `
+                <div class="ticket-attachment-chip">📎 ${file.name}</div>
+              `).join('')}
+            </div>
+          ` : ''}
+          
+          <div class="ticket-meta">
+            <div class="ticket-date">
+              🕒 ${ticket.date}
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function openTicketModal(ticketId = null) {
+      const modal = document.getElementById('ticket-modal');
+      const modalTitle = document.getElementById('modal-title');
+      const titleInput = document.getElementById('ticket-title-input');
+      const descInput = document.getElementById('ticket-description-input');
+      const filesList = document.getElementById('ticket-files-list');
+
+      editingTicketId = ticketId;
+      ticketFiles = [];
+
+      if (ticketId) {
+        const ticket = tickets.find(t => t.id === ticketId);
+        if (ticket) {
+          modalTitle.textContent = 'Editar Chamado';
+          titleInput.value = ticket.title;
+          descInput.value = ticket.description || '';
+          selectedColor = ticket.color;
+          ticketFiles = [...(ticket.attachments || [])];
+
+          // Update color selection
+          document.querySelectorAll('.color-option').forEach(opt => {
+            opt.classList.toggle('selected', opt.dataset.color === selectedColor);
+          });
+
+          // Show existing files
+          renderTicketFiles();
+        }
+      } else {
+        modalTitle.textContent = 'Novo Chamado';
+        titleInput.value = '';
+        descInput.value = '';
+        selectedColor = '#6c63ff';
+        filesList.innerHTML = '';
+
+        // Reset color selection
+        document.querySelectorAll('.color-option').forEach(opt => {
+          opt.classList.toggle('selected', opt.dataset.color === '#6c63ff');
+        });
       }
 
-      const syncBtn = document.getElementById('sync-btn');
-      syncBtn.textContent = '⌛ Conectando...';
+      modal.classList.add('open');
+    }
 
-      try {
-        const state = {};
-        for (let i = 0; i < localStorage.length; i++) {
-          const key = localStorage.key(i);
-          state[key] = localStorage.getItem(key);
-        }
+    function closeTicketModal() {
+      document.getElementById('ticket-modal').classList.remove('open');
+      editingTicketId = null;
+      ticketFiles = [];
+    }
 
-        const blob = new Blob([JSON.stringify(state)], { type: 'application/json' });
-
-        try {
-          const download = await dbx.filesDownload({ path: '/ai_dev_path_db.json' });
-          const cloudState = JSON.parse(await download.result.fileBlob.text());
-
-          if (confirm("Dados encontrados! Deseja baixar o progresso da nuvem?\n\nOK: Baixar da Nuvem (Substitui local)\nCancelar: Sobrescrever Nuvem com dados locais")) {
-            Object.keys(cloudState).forEach(key => localStorage.setItem(key, cloudState[key]));
-            alert("Sucesso! Recarregando...");
-            location.reload();
-            return;
-          }
-        } catch (e) {
-          // 409 Path Not Found é esperado na primeira vez
-          if (e.status !== 409 && e.status !== 404) {
-            console.error("Erro no Download:", e);
-            if (e.status === 401 || e.status === 400) throw e;
-          }
-        }
-
-        await dbx.filesUpload({
-          path: '/ai_dev_path_db.json',
-          contents: blob,
-          mode: 'overwrite'
-        });
-
-        alert("✅ Sincronizado com sucesso!");
-      } catch (error) {
-        console.error("ERRO COMPLETO:", error);
-
-        let detail = "Erro desconhecido";
-        if (error.error && typeof error.error === 'string') detail = error.error;
-        else if (error.error && error.error.error_summary) detail = error.error.error_summary;
-        else if (error.message) detail = error.message;
-
-        alert(`❌ Falha na Sincronização\n\nStatus: ${error.status || 'N/A'}\nDetalhe: ${detail}\n\nVerifique se o Token está correto e se o App no Dropbox tem permissão 'files.content.write'.`);
-        dbx = null;
-      } finally {
-        syncBtn.textContent = '☁ Sincronizar';
+    function handleTicketModalClick(e) {
+      if (e.target === document.getElementById('ticket-modal')) {
+        closeTicketModal();
       }
     }
+
+    function saveTicket() {
+      const title = document.getElementById('ticket-title-input').value.trim();
+      const description = document.getElementById('ticket-description-input').value.trim();
+
+      if (!title) {
+        alert('Por favor, adicione um título ao chamado');
+        return;
+      }
+
+      const timestamp = new Date().toLocaleString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+
+      if (editingTicketId) {
+        // Edit existing ticket
+        const ticketIndex = tickets.findIndex(t => t.id === editingTicketId);
+        if (ticketIndex !== -1) {
+          tickets[ticketIndex] = {
+            ...tickets[ticketIndex],
+            title,
+            description,
+            color: selectedColor,
+            attachments: ticketFiles,
+            updatedAt: timestamp
+          };
+        }
+      } else {
+        // Create new ticket
+        const newTicket = {
+          id: Date.now().toString(),
+          title,
+          description,
+          color: selectedColor,
+          attachments: ticketFiles,
+          date: timestamp,
+          createdAt: timestamp
+        };
+        tickets.unshift(newTicket);
+      }
+
+      saveTickets();
+      closeTicketModal();
+    }
+
+    function editTicket(ticketId) {
+      openTicketModal(ticketId);
+    }
+
+    function deleteTicket(ticketId) {
+      if (confirm('Tem certeza que deseja excluir este chamado?')) {
+        tickets = tickets.filter(t => t.id !== ticketId);
+        saveTickets();
+      }
+    }
+
+    function handleTicketFiles(input) {
+      const files = Array.from(input.files);
+
+      files.forEach(file => {
+        ticketFiles.push({
+          name: file.name,
+          size: file.size,
+          type: file.type,
+          id: Date.now() + Math.random()
+        });
+      });
+
+      renderTicketFiles();
+      input.value = '';
+    }
+
+    function renderTicketFiles() {
+      const filesList = document.getElementById('ticket-files-list');
+
+      filesList.innerHTML = ticketFiles.map(file => `
+        <div class="file-item">
+          <span>📄 ${file.name}</span>
+          <span class="file-remove" onclick="removeTicketFile(${file.id})">✕</span>
+        </div>
+      `).join('');
+    }
+
+    function removeTicketFile(fileId) {
+      ticketFiles = ticketFiles.filter(f => f.id !== fileId);
+      renderTicketFiles();
+    }
+
+    // Color picker
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.color-option').forEach(option => {
+        option.addEventListener('click', function () {
+          document.querySelectorAll('.color-option').forEach(opt => {
+            opt.classList.remove('selected');
+          });
+          this.classList.add('selected');
+          selectedColor = this.dataset.color;
+        });
+      });
+    });
+
+    // ===================== INIT =====================
+    initProgressCards();
+    loadRoadmapState();
+    loadTickets();
   </script>
 </body>
 
