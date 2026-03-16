@@ -1057,19 +1057,26 @@ async function testConnection() {
     
     if (response.ok) {
       const data = await response.json();
-      showSyncNotification(`Conectado como: ${data.name.display_name}`, 'success');
+      showSyncNotification(`✅ Conectado como: ${data.name.display_name}`, 'success');
       setSyncButtonState('success');
       updateSyncStatus(true);
       
       document.getElementById('sync-upload-btn').disabled = false;
       document.getElementById('sync-download-btn').disabled = false;
+      
+      // Reset button state after 2 seconds
+      setTimeout(() => setSyncButtonState('default'), 2000);
     } else {
-      throw new Error('Token inválido');
+      const errorData = await response.text();
+      console.error('Dropbox auth error:', errorData);
+      throw new Error('Token inválido ou expirado');
     }
   } catch (error) {
-    showSyncNotification('Erro na conexão: ' + error.message, 'error');
+    console.error('Connection test error:', error);
+    showSyncNotification('❌ Erro: ' + error.message, 'error');
     setSyncButtonState('error');
     updateSyncStatus(false);
+    setTimeout(() => setSyncButtonState('default'), 2000);
   }
 }
 
@@ -1082,6 +1089,7 @@ async function syncToCloud() {
   try {
     setSyncButtonState('syncing');
     
+    // Coletar todos os dados
     const allData = {
       version: '4.0',
       timestamp: new Date().toISOString(),
@@ -1094,12 +1102,16 @@ async function syncToCloud() {
       }
     };
     
+    // Coletar dados de progresso
     ['card1', 'card2', 'card3', 'card4'].forEach(cardId => {
       allData.data.progress[cardId] = localStorage.getItem(`progress-${cardId}`);
       allData.data.notes[cardId] = localStorage.getItem(`notes-${cardId}`);
       allData.data.attachments[cardId] = localStorage.getItem(`attachments-${cardId}`);
     });
     
+    console.log('Uploading data to Dropbox...', allData);
+    
+    // Upload para Dropbox
     const response = await fetch('https://content.dropboxapi.com/2/files/upload', {
       method: 'POST',
       headers: {
@@ -1116,19 +1128,25 @@ async function syncToCloud() {
     });
     
     if (response.ok) {
+      const result = await response.json();
+      console.log('Upload successful:', result);
+      
       const timestamp = new Date().toLocaleString('pt-BR');
       localStorage.setItem('last-sync-time', timestamp);
       updateLastSyncTime();
       
-      showSyncNotification('Dados enviados com sucesso!', 'success');
+      showSyncNotification('✅ Dados enviados com sucesso!', 'success');
       setSyncButtonState('success');
       
       setTimeout(() => setSyncButtonState('default'), 2000);
     } else {
-      throw new Error('Falha no upload');
+      const errorText = await response.text();
+      console.error('Upload error:', errorText);
+      throw new Error('Falha no upload: ' + response.status);
     }
   } catch (error) {
-    showSyncNotification('Erro ao enviar: ' + error.message, 'error');
+    console.error('Sync to cloud error:', error);
+    showSyncNotification('❌ Erro ao enviar: ' + error.message, 'error');
     setSyncButtonState('error');
     setTimeout(() => setSyncButtonState('default'), 2000);
   }
@@ -1158,9 +1176,12 @@ async function syncFromCloud() {
     });
     
     if (response.ok) {
-      const data = await response.json();
+      // O Dropbox retorna o conteúdo do arquivo como texto no body
+      const textData = await response.text();
+      const data = JSON.parse(textData);
       
       if (data.data) {
+        // Restaurar progresso
         if (data.data.progress) {
           Object.keys(data.data.progress).forEach(key => {
             if (data.data.progress[key]) {
@@ -1169,6 +1190,7 @@ async function syncFromCloud() {
           });
         }
         
+        // Restaurar notas
         if (data.data.notes) {
           Object.keys(data.data.notes).forEach(key => {
             if (data.data.notes[key]) {
@@ -1177,6 +1199,7 @@ async function syncFromCloud() {
           });
         }
         
+        // Restaurar anexos
         if (data.data.attachments) {
           Object.keys(data.data.attachments).forEach(key => {
             if (data.data.attachments[key]) {
@@ -1185,10 +1208,12 @@ async function syncFromCloud() {
           });
         }
         
+        // Restaurar roadmap
         if (data.data.roadmap) {
           localStorage.setItem('roadmap-state', data.data.roadmap);
         }
         
+        // Restaurar tickets
         if (data.data.tickets) {
           localStorage.setItem('tickets-eliana', data.data.tickets);
         }
@@ -1205,9 +1230,12 @@ async function syncFromCloud() {
         location.reload();
       }, 1500);
     } else {
-      throw new Error('Arquivo não encontrado na nuvem');
+      const errorText = await response.text();
+      console.error('Dropbox error:', errorText);
+      throw new Error('Arquivo não encontrado na nuvem ou erro de permissão');
     }
   } catch (error) {
+    console.error('Sync error:', error);
     showSyncNotification('Erro ao baixar: ' + error.message, 'error');
     setSyncButtonState('error');
     setTimeout(() => setSyncButtonState('default'), 2000);
