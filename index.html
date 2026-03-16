@@ -29,7 +29,7 @@
       <button class="nav-tab" onclick="switchTab(1)">Roadmap</button>
       <button class="nav-tab" onclick="switchTab(2)">Progresso</button>
       <button class="nav-tab" onclick="switchTab(3)">Minha Área</button>
-      <button class="nav-tab" onclick="switchTab(4)">Chamados Eliana</button>
+      <button class="nav-tab" onclick="switchTab(4)">Chamados</button>
     </div>
   </nav>
 
@@ -202,24 +202,68 @@ console.log("Arquitetura:", myNetwork.layers.join(" → "));
     </div>
   </div>
 
-  <!-- PAGE 5: CHAMADOS ELIANA -->
+  <!-- PAGE 5: CHAMADOS -->
   <div class="page" id="page-4">
     <div class="tickets-container">
-      <div class="page-header">
-        <p class="page-eyebrow">// Gestão de Chamados</p>
-        <h2 class="page-title">Chamados <em>Eliana</em></h2>
-      </div>
-      <div class="tickets-header">
-        <div style="flex: 1;">
-          <p style="color: var(--muted); font-size: 0.85rem;">Organize e acompanhe seus chamados</p>
+      
+      <!-- Login Screen -->
+      <div class="login-screen" id="login-screen">
+        <div class="login-box">
+          <div class="login-icon">🎫</div>
+          <h2 class="login-title">Sistema de Chamados</h2>
+          <p class="login-subtitle">Faça login para começar a atender</p>
+          <div class="login-form">
+            <div class="login-input-group">
+              <label class="login-label">👤 Nome do Atendente</label>
+              <input type="text" class="login-input" id="attendant-name" placeholder="Digite seu nome">
+            </div>
+            <button class="login-btn" onclick="performLogin()">Entrar no Sistema</button>
+          </div>
         </div>
-        <button class="new-ticket-btn" onclick="openTicketModal()">+ Novo Chamado</button>
       </div>
-      <div class="tickets-board" id="tickets-board"></div>
-      <div class="empty-state" id="empty-state" style="display: none;">
-        <div class="empty-state-icon">📋</div>
-        <div class="empty-state-text">Nenhum chamado ainda</div>
-        <div class="empty-state-hint">Clique em "Novo Chamado" para começar</div>
+
+      <!-- Main Content (after login) -->
+      <div class="tickets-main" id="tickets-main" style="display: none;">
+        <div class="page-header">
+          <p class="page-eyebrow">// Gestão de Atendimento</p>
+          <h2 class="page-title">Sistema de <em>Chamados</em></h2>
+          <div class="attendant-info">
+            <span class="attendant-badge">👤 <span id="current-attendant">Atendente</span></span>
+            <button class="logout-btn" onclick="performLogout()">Sair</button>
+          </div>
+        </div>
+
+        <div class="tickets-stats">
+          <div class="stat-card">
+            <div class="stat-number" id="stat-available">0</div>
+            <div class="stat-label">Disponíveis</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="stat-in-progress">0</div>
+            <div class="stat-label">Em Atendimento</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="stat-completed">0</div>
+            <div class="stat-label">Concluídos</div>
+          </div>
+        </div>
+
+        <div class="tickets-header">
+          <div class="tickets-filter">
+            <button class="filter-btn active" onclick="filterTickets('all')">Todos</button>
+            <button class="filter-btn" onclick="filterTickets('available')">Disponíveis</button>
+            <button class="filter-btn" onclick="filterTickets('in-progress')">Meus Atendimentos</button>
+            <button class="filter-btn" onclick="filterTickets('completed')">Concluídos</button>
+          </div>
+          <button class="new-ticket-btn" onclick="openTicketModal()">+ Novo Chamado</button>
+        </div>
+
+        <div class="tickets-board" id="tickets-board"></div>
+        <div class="empty-state" id="empty-state" style="display: none;">
+          <div class="empty-state-icon">📋</div>
+          <div class="empty-state-text">Nenhum chamado ainda</div>
+          <div class="empty-state-hint">Clique em "Novo Chamado" para começar</div>
+        </div>
       </div>
     </div>
   </div>

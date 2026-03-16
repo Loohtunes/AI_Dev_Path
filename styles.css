@@ -1366,11 +1366,202 @@ nav {
   content: 'Saída do código aparecerá aqui...';
   color: var(--muted);
 }
-/* Tickets/Chamados Eliana */
+/* Tickets/Chamados */
 .tickets-container {
   max-width: 1400px;
   margin: 0 auto;
   padding: 3rem 2rem 4rem;
+}
+
+/* Login Screen */
+.login-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+}
+
+.login-box {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 16px;
+  padding: 3rem;
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+  animation: slideUpDetail 0.3s ease;
+}
+
+.login-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.login-title {
+  font-size: 1.8rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+  color: var(--text);
+}
+
+.login-subtitle {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin-bottom: 2rem;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.login-input-group {
+  text-align: left;
+}
+
+.login-label {
+  display: block;
+  font-size: 0.75rem;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  margin-bottom: 0.5rem;
+}
+
+.login-input {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.login-input:focus {
+  border-color: var(--accent);
+}
+
+.login-btn {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border: none;
+  border-radius: 10px;
+  padding: 0.875rem 1.5rem;
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 15px rgba(108, 99, 255, 0.3);
+}
+
+.login-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(108, 99, 255, 0.4);
+}
+
+/* Attendant Info */
+.attendant-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.attendant-badge {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  font-family: var(--font-mono);
+  color: var(--accent2);
+}
+
+.logout-btn {
+  background: var(--surface3);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  color: var(--muted);
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.logout-btn:hover {
+  background: var(--accent3);
+  color: #fff;
+  border-color: var(--accent3);
+}
+
+/* Stats Cards */
+.tickets-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.stat-number {
+  font-size: 2.5rem;
+  font-weight: 800;
+  font-family: var(--font-mono);
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Tickets Filter */
+.tickets-filter {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  color: var(--muted);
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.filter-btn:hover {
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+.filter-btn.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
 }
 
 .tickets-header {
@@ -1435,6 +1626,52 @@ nav {
   transform: translateY(-4px);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
   border-color: var(--ticket-color, var(--accent));
+}
+
+.ticket-card.in-progress {
+  border-color: var(--accent2);
+  background: linear-gradient(135deg, var(--surface) 0%, rgba(0, 212, 170, 0.05) 100%);
+}
+
+.ticket-card.completed {
+  opacity: 0.6;
+  border-color: var(--muted);
+}
+
+.ticket-card.completed::before {
+  background: var(--muted);
+}
+
+.ticket-status-badge {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.7rem;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.ticket-status-badge.available {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: rgba(108, 99, 255, 0.1);
+}
+
+.ticket-status-badge.in-progress {
+  color: var(--accent2);
+  border-color: var(--accent2);
+  background: rgba(0, 212, 170, 0.1);
+}
+
+.ticket-status-badge.completed {
+  color: var(--muted);
+  border-color: var(--muted);
+  background: rgba(102, 102, 128, 0.1);
 }
 
 .ticket-header {
@@ -1502,6 +1739,65 @@ nav {
   color: var(--muted);
   padding-top: 0.5rem;
   border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.ticket-attendant {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--accent2);
+}
+
+.ticket-actions-bottom {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.ticket-pull-btn,
+.ticket-complete-btn,
+.ticket-release-btn {
+  flex: 1;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.ticket-pull-btn {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #fff;
+}
+
+.ticket-pull-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(108, 99, 255, 0.3);
+}
+
+.ticket-complete-btn {
+  background: var(--accent2);
+  color: #fff;
+}
+
+.ticket-complete-btn:hover {
+  background: #00f5a0;
+}
+
+.ticket-release-btn {
+  background: var(--surface3);
+  border: 1px solid var(--border2);
+  color: var(--muted);
+}
+
+.ticket-release-btn:hover {
+  background: var(--accent4);
+  color: #fff;
+  border-color: var(--accent4);
 }
 
 .ticket-attachments {

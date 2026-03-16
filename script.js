@@ -791,6 +791,123 @@ let tickets = [];
 let editingTicketId = null;
 let ticketFiles = [];
 let selectedColor = '#6c63ff';
+let currentAttendant = null;
+let currentFilter = 'all';
+let autoSyncInterval = null;
+
+// Login System
+function performLogin() {
+  const nameInput = document.getElementById('attendant-name');
+  const name = nameInput.value.trim();
+  
+  if (!name) {
+    alert('Por favor, digite seu nome');
+    return;
+  }
+  
+  currentAttendant = name;
+  localStorage.setItem('current-attendant', name);
+  
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('tickets-main').style.display = 'block';
+  document.getElementById('current-attendant').textContent = name;
+  
+  loadTickets();
+  startAutoSync();
+  
+  showSyncNotification(`Bem-vindo(a), ${name}! 👋`, 'success');
+}
+
+function performLogout() {
+  if (confirm('Deseja realmente sair do sistema?')) {
+    currentAttendant = null;
+    localStorage.removeItem('current-attendant');
+    
+    stopAutoSync();
+    
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('tickets-main').style.display = 'none';
+    document.getElementById('attendant-name').value = '';
+  }
+}
+
+function checkLoginStatus() {
+  const savedAttendant = localStorage.getItem('current-attendant');
+  if (savedAttendant) {
+    currentAttendant = savedAttendant;
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('tickets-main').style.display = 'block';
+    document.getElementById('current-attendant').textContent = savedAttendant;
+    startAutoSync();
+  }
+}
+
+// Auto Sync System
+function startAutoSync() {
+  // Sync every 30 seconds
+  autoSyncInterval = setInterval(() => {
+    if (dropboxToken && currentAttendant) {
+      autoSyncFromCloud();
+    }
+  }, 30000); // 30 seconds
+  
+  // Initial sync
+  if (dropboxToken) {
+    autoSyncFromCloud();
+  }
+}
+
+function stopAutoSync() {
+  if (autoSyncInterval) {
+    clearInterval(autoSyncInterval);
+    autoSyncInterval = null;
+  }
+}
+
+async function autoSyncFromCloud() {
+  if (!dropboxToken) return;
+  
+  try {
+    const response = await fetch('https://content.dropboxapi.com/2/files/download', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${dropboxToken}`,
+        'Dropbox-API-Arg': JSON.stringify({
+          path: DROPBOX_FILE_PATH
+        })
+      }
+    });
+    
+    if (response.ok) {
+      const textData = await response.text();
+      const data = JSON.parse(textData);
+      
+      if (data.data && data.data.tickets) {
+        const remoteTickets = JSON.parse(data.data.tickets);
+        
+        // Merge tickets (keep local changes priority for tickets being edited)
+        tickets = remoteTickets;
+        localStorage.setItem('tickets-eliana', data.data.tickets);
+        
+        renderTickets();
+        updateStats();
+        
+        console.log('Auto-sync completed:', new Date().toLocaleTimeString());
+      }
+    }
+  } catch (error) {
+    console.log('Auto-sync skipped:', error.message);
+  }
+}
+
+// Auto-save when changes happen
+function autoSaveToCloud() {
+  if (dropboxToken && currentAttendant) {
+    setTimeout(() => {
+      syncToCloud();
+    }, 2000); // Save after 2 seconds of inactivity
+  }
+}
 
 function loadTickets() {
   const saved = localStorage.getItem('tickets-eliana');
@@ -798,18 +915,52 @@ function loadTickets() {
     tickets = JSON.parse(saved);
   }
   renderTickets();
+  updateStats();
 }
 
 function saveTickets() {
   localStorage.setItem('tickets-eliana', JSON.stringify(tickets));
   renderTickets();
+  updateStats();
+  autoSaveToCloud(); // Auto-save to cloud
+}
+
+function filterTickets(filter) {
+  currentFilter = filter;
+  
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  event.target.classList.add('active');
+  
+  renderTickets();
+}
+
+function updateStats() {
+  const available = tickets.filter(t => t.status === 'available').length;
+  const inProgress = tickets.filter(t => t.status === 'in-progress').length;
+  const completed = tickets.filter(t => t.status === 'completed').length;
+  
+  document.getElementById('stat-available').textContent = available;
+  document.getElementById('stat-in-progress').textContent = inProgress;
+  document.getElementById('stat-completed').textContent = completed;
 }
 
 function renderTickets() {
   const board = document.getElementById('tickets-board');
   const emptyState = document.getElementById('empty-state');
   
-  if (tickets.length === 0) {
+  // Filter tickets
+  let filteredTickets = tickets;
+  if (currentFilter === 'available') {
+    filteredTickets = tickets.filter(t => t.status === 'available');
+  } else if (currentFilter === 'in-progress') {
+    filteredTickets = tickets.filter(t => t.status === 'in-progress' && t.attendant === currentAttendant);
+  } else if (currentFilter === 'completed') {
+    filteredTickets = tickets.filter(t => t.status === 'completed');
+  }
+  
+  if (filteredTickets.length === 0) {
     board.style.display = 'none';
     emptyState.style.display = 'block';
     return;
@@ -818,31 +969,117 @@ function renderTickets() {
   board.style.display = 'grid';
   emptyState.style.display = 'none';
   
-  board.innerHTML = tickets.map(ticket => `
-    <div class="ticket-card" style="--ticket-color: ${ticket.color}">
-      <div class="ticket-header">
-        <div class="ticket-title">${ticket.title}</div>
-        <div class="ticket-actions">
-          <button class="ticket-edit-btn" onclick="editTicket('${ticket.id}')" title="Editar">✎</button>
-          <button class="ticket-delete-btn" onclick="deleteTicket('${ticket.id}')" title="Excluir">✕</button>
+  board.innerHTML = filteredTickets.map(ticket => {
+    const status = ticket.status || 'available';
+    const statusLabel = {
+      'available': 'Disponível',
+      'in-progress': 'Em Atendimento',
+      'completed': 'Concluído'
+    }[status];
+    
+    let actionButtons = '';
+    if (status === 'available') {
+      actionButtons = `
+        <div class="ticket-actions-bottom">
+          <button class="ticket-pull-btn" onclick="pullTicket('${ticket.id}')">🎯 Puxar Chamado</button>
         </div>
-      </div>
-      
-      ${ticket.description ? `<div class="ticket-description">${ticket.description}</div>` : ''}
-      
-      ${ticket.attachments && ticket.attachments.length > 0 ? `
-        <div class="ticket-attachments">
-          ${ticket.attachments.map(file => `
-            <div class="ticket-attachment-chip">📎 ${file.name}</div>
-          `).join('')}
+      `;
+    } else if (status === 'in-progress' && ticket.attendant === currentAttendant) {
+      actionButtons = `
+        <div class="ticket-actions-bottom">
+          <button class="ticket-complete-btn" onclick="completeTicket('${ticket.id}')">✅ Concluir</button>
+          <button class="ticket-release-btn" onclick="releaseTicket('${ticket.id}')">↩️ Devolver</button>
         </div>
-      ` : ''}
-      
-      <div class="ticket-meta">
-        <div>🕒 ${ticket.date}</div>
+      `;
+    }
+    
+    return `
+      <div class="ticket-card ${status}" style="--ticket-color: ${ticket.color}">
+        <div class="ticket-status-badge ${status}">${statusLabel}</div>
+        
+        <div class="ticket-header" style="margin-top: 1.5rem;">
+          <div class="ticket-title">${ticket.title}</div>
+          ${status !== 'in-progress' || ticket.attendant === currentAttendant ? `
+            <div class="ticket-actions">
+              <button class="ticket-edit-btn" onclick="editTicket('${ticket.id}')" title="Editar">✎</button>
+              <button class="ticket-delete-btn" onclick="deleteTicket('${ticket.id}')" title="Excluir">✕</button>
+            </div>
+          ` : ''}
+        </div>
+        
+        ${ticket.description ? `<div class="ticket-description">${ticket.description}</div>` : ''}
+        
+        ${ticket.attachments && ticket.attachments.length > 0 ? `
+          <div class="ticket-attachments">
+            ${ticket.attachments.map(file => `
+              <div class="ticket-attachment-chip">📎 ${file.name}</div>
+            `).join('')}
+          </div>
+        ` : ''}
+        
+        <div class="ticket-meta">
+          <div>🕒 ${ticket.date}</div>
+          ${ticket.attendant ? `<div class="ticket-attendant">👤 ${ticket.attendant}</div>` : ''}
+        </div>
+        
+        ${actionButtons}
       </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
+}
+
+function pullTicket(ticketId) {
+  const ticket = tickets.find(t => t.id === ticketId);
+  if (!ticket) return;
+  
+  if (ticket.status !== 'available') {
+    showSyncNotification('Este chamado não está mais disponível', 'error');
+    return;
+  }
+  
+  ticket.status = 'in-progress';
+  ticket.attendant = currentAttendant;
+  ticket.startedAt = new Date().toLocaleString('pt-BR');
+  
+  saveTickets();
+  showSyncNotification(`Chamado "${ticket.title}" assumido! 🎯`, 'success');
+}
+
+function completeTicket(ticketId) {
+  const ticket = tickets.find(t => t.id === ticketId);
+  if (!ticket) return;
+  
+  if (ticket.attendant !== currentAttendant) {
+    showSyncNotification('Você não pode concluir este chamado', 'error');
+    return;
+  }
+  
+  if (confirm(`Concluir o chamado "${ticket.title}"?`)) {
+    ticket.status = 'completed';
+    ticket.completedAt = new Date().toLocaleString('pt-BR');
+    
+    saveTickets();
+    showSyncNotification(`Chamado "${ticket.title}" concluído! ✅`, 'success');
+  }
+}
+
+function releaseTicket(ticketId) {
+  const ticket = tickets.find(t => t.id === ticketId);
+  if (!ticket) return;
+  
+  if (ticket.attendant !== currentAttendant) {
+    showSyncNotification('Você não pode devolver este chamado', 'error');
+    return;
+  }
+  
+  if (confirm(`Devolver o chamado "${ticket.title}" para a fila?`)) {
+    ticket.status = 'available';
+    ticket.attendant = null;
+    ticket.startedAt = null;
+    
+    saveTickets();
+    showSyncNotification(`Chamado "${ticket.title}" devolvido à fila`, 'success');
+  }
 }
 
 function openTicketModal(ticketId = null) {
@@ -934,13 +1171,18 @@ function saveTicket() {
       color: selectedColor,
       attachments: ticketFiles,
       date: timestamp,
-      createdAt: timestamp
+      createdAt: timestamp,
+      status: 'available', // New tickets start as available
+      attendant: null,
+      startedAt: null,
+      completedAt: null
     };
     tickets.unshift(newTicket);
   }
   
   saveTickets();
   closeTicketModal();
+  showSyncNotification('Chamado salvo com sucesso! 📝', 'success');
 }
 
 function editTicket(ticketId) {
@@ -1389,7 +1631,11 @@ function switchTab(idx) {
     }, 100);
   }
   if (idx === 4) {
-    renderTickets();
+    checkLoginStatus();
+    if (currentAttendant) {
+      renderTickets();
+      updateStats();
+    }
   }
 }
 
@@ -1414,4 +1660,8 @@ document.addEventListener('keydown', e => {
 // ===== INITIALIZATION =====
 initProgressCards();
 loadRoadmapState();
-loadTickets();
+checkLoginStatus(); // Check if user is already logged in
+if (currentAttendant) {
+  loadTickets();
+}
+
