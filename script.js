@@ -788,29 +788,181 @@ function clearNNOutput() {
 }
 // ===== TICKETS MANAGEMENT =====
 let tickets = [];
+let users = [];
 let editingTicketId = null;
 let ticketFiles = [];
 let selectedColor = '#6c63ff';
-let currentAttendant = null;
+let currentUser = null;
 let currentFilter = 'all';
 let autoSyncInterval = null;
 
+// User Management System
+function loadUsers() {
+  const saved = localStorage.getItem('users-eliana');
+  if (saved) {
+    users = JSON.parse(saved);
+  }
+}
+
+function saveUsers() {
+  localStorage.setItem('users-eliana', JSON.stringify(users));
+  
+  if (users.length > 0) {
+    document.getElementById('first-user-btn').style.display = 'none';
+  } else {
+    document.getElementById('first-user-btn').style.display = 'inline-block';
+  }
+}
+
+function openUserManagerModal() {
+  document.getElementById('user-modal').classList.add('open');
+  renderUserList();
+  document.getElementById('user-form-container').style.display = 'none';
+  document.getElementById('user-list-container').style.display = 'block';
+  document.getElementById('user-modal-title').textContent = 'Gerenciar Usuários';
+}
+
+function closeUserModal() {
+  document.getElementById('user-modal').classList.remove('open');
+  document.getElementById('user-name-input').value = '';
+  document.getElementById('user-pass-input').value = '';
+  document.getElementById('user-role-input').value = 'requester';
+  document.getElementById('user-admin-input').checked = false;
+  toggleAdminCheckbox();
+}
+
+function toggleAdminCheckbox() {
+  const role = document.getElementById('user-role-input').value;
+  const adminGroup = document.getElementById('user-admin-group');
+  if (role === 'attendant') {
+    adminGroup.style.display = 'flex';
+  } else {
+    adminGroup.style.display = 'none';
+    document.getElementById('user-admin-input').checked = false;
+  }
+}
+
+function showUserForm() {
+  document.getElementById('user-list-container').style.display = 'none';
+  document.getElementById('user-form-container').style.display = 'block';
+  document.getElementById('user-modal-title').textContent = 'Novo Usuário';
+}
+
+function openUserForm(isFirstUser = false) {
+  document.getElementById('user-modal').classList.add('open');
+  document.getElementById('user-list-container').style.display = 'none';
+  document.getElementById('user-form-container').style.display = 'block';
+  document.getElementById('user-modal-title').textContent = 'Criar Primeiro Usuário';
+  
+  if (isFirstUser) {
+    document.getElementById('user-role-input').value = 'attendant';
+    toggleAdminCheckbox();
+    document.getElementById('user-admin-input').checked = true;
+    document.getElementById('user-role-group').style.display = 'none';
+    document.getElementById('user-admin-group').style.display = 'none';
+  }
+}
+
+function saveUser() {
+  const name = document.getElementById('user-name-input').value.trim();
+  const pass = document.getElementById('user-pass-input').value.trim();
+  const role = document.getElementById('user-role-input').value; // 'requester' or 'attendant'
+  const isAdmin = document.getElementById('user-admin-input').checked;
+
+  if (!name || !pass) {
+    alert('Preencha nome de usuário e senha');
+    return;
+  }
+
+  if (users.find(u => u.username === name)) {
+    alert('Usuário já existe!');
+    return;
+  }
+
+  users.push({
+    id: Date.now().toString(),
+    username: name,
+    password: pass, // in a real app, hash this
+    role: role,
+    isAdmin: isAdmin
+  });
+
+  saveUsers();
+  
+  if (!currentUser) { // Was the first user
+    closeUserModal();
+    showSyncNotification('Usuário criado! Faça o login agora.', 'success');
+  } else {
+    renderUserList();
+    document.getElementById('user-form-container').style.display = 'none';
+    document.getElementById('user-list-container').style.display = 'block';
+    
+    // reset form
+    document.getElementById('user-name-input').value = '';
+    document.getElementById('user-pass-input').value = '';
+    showSyncNotification('Usuário adicionado.', 'success');
+  }
+}
+
+function removeUser(userId) {
+  if (confirm('Deletar este usuário?')) {
+    users = users.filter(u => u.id !== userId);
+    saveUsers();
+    renderUserList();
+    
+    // If deleted self
+    if (currentUser && currentUser.id === userId) {
+      closeUserModal();
+      performLogout();
+    }
+  }
+}
+
+function renderUserList() {
+  const container = document.getElementById('users-list');
+  container.innerHTML = users.map(u => `
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 5px; border-bottom: 1px solid var(--border);">
+      <div>
+        <strong>${u.username}</strong> 
+        <span style="font-size: 0.8rem; color: var(--muted); margin-left: 5px;">
+          (${u.role === 'attendant' ? 'Atendente' : 'Solicitante'}${u.isAdmin ? ' Admin' : ''})
+        </span>
+      </div>
+      <button onclick="removeUser('${u.id}')" style="background:none; border:none; color: var(--accent3); cursor:pointer;">✕</button>
+    </div>
+  `).join('');
+}
+
+
 // Login System
 function performLogin() {
+  loadUsers();
   const nameInput = document.getElementById('attendant-name');
+  const passInput = document.getElementById('attendant-pass');
   const name = nameInput.value.trim();
+  const pass = passInput.value.trim();
   
-  if (!name) {
-    alert('Por favor, digite seu nome');
+  if (!name || !pass) {
+    alert('Por favor, digite seu nome e senha');
+    return;
+  }
+
+  const user = users.find(u => u.username === name && u.password === pass);
+
+  if (!user) {
+    alert('Usuário ou senha incorretos.');
     return;
   }
   
-  currentAttendant = name;
-  localStorage.setItem('current-attendant', name);
+  currentUser = user;
+  localStorage.setItem('current-user', JSON.stringify(user));
   
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('tickets-main').style.display = 'block';
   document.getElementById('current-attendant').textContent = name;
+  document.getElementById('attendant-pass').value = '';
+  
+  applyRoleUI();
   
   loadTickets();
   startAutoSync();
@@ -818,16 +970,70 @@ function performLogin() {
   showSyncNotification(`Bem-vindo(a), ${name}! 👋`, 'success');
 }
 
+function applyRoleUI() {
+  if (!currentUser) return;
+  
+  // Shield button for admins
+  const adminBtn = document.getElementById('admin-shield-btn');
+  if (currentUser.isAdmin) {
+    adminBtn.style.display = 'inline-block';
+  } else {
+    adminBtn.style.display = 'none';
+  }
+  
+  // Filter tabs
+  const filtersWrapper = document.querySelector('.tickets-filter');
+  if (currentUser.role === 'requester') {
+    filtersWrapper.style.display = 'none'; // Requesters don't see filters
+    currentFilter = 'my-requests';
+  } else {
+    filtersWrapper.style.display = 'flex'; // Attendants see filters
+    currentFilter = 'all';
+    document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelector('.filter-btn[onclick="filterTickets(\'all\')"]').classList.add('active');
+  }
+}
+
 function performLogout() {
   if (confirm('Deseja realmente sair do sistema?')) {
-    currentAttendant = null;
-    localStorage.removeItem('current-attendant');
+    currentUser = null;
+    localStorage.removeItem('current-user');
     
     stopAutoSync();
     
     document.getElementById('login-screen').style.display = 'flex';
     document.getElementById('tickets-main').style.display = 'none';
     document.getElementById('attendant-name').value = '';
+    
+    // Check if there are no users to show create button
+    loadUsers();
+    if (users.length === 0) {
+      document.getElementById('first-user-btn').style.display = 'inline-block';
+    } else {
+      document.getElementById('first-user-btn').style.display = 'none';
+    }
+  }
+}
+
+function checkLoginStatus() {
+  loadUsers();
+  if (users.length === 0) {
+    document.getElementById('first-user-btn').style.display = 'inline-block';
+  }
+
+  const savedUser = localStorage.getItem('current-user');
+  if (savedUser) {
+    try {
+      currentUser = JSON.parse(savedUser);
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('tickets-main').style.display = 'block';
+      document.getElementById('current-attendant').textContent = currentUser.username;
+      
+      applyRoleUI();
+      startAutoSync();
+    } catch (e) {
+      localStorage.removeItem('current-user');
+    }
   }
 }
 
@@ -846,7 +1052,7 @@ function checkLoginStatus() {
 function startAutoSync() {
   // Sync every 30 seconds
   autoSyncInterval = setInterval(() => {
-    if (dropboxToken && currentAttendant) {
+    if (dropboxToken && currentUser) {
       autoSyncFromCloud();
     }
   }, 30000); // 30 seconds
@@ -889,6 +1095,11 @@ async function autoSyncFromCloud() {
         tickets = remoteTickets;
         localStorage.setItem('tickets-eliana', data.data.tickets);
         
+        if (data.data.users) {
+          users = JSON.parse(data.data.users);
+          localStorage.setItem('users-eliana', data.data.users);
+        }
+        
         renderTickets();
         updateStats();
         
@@ -902,7 +1113,7 @@ async function autoSyncFromCloud() {
 
 // Auto-save when changes happen
 function autoSaveToCloud() {
-  if (dropboxToken && currentAttendant) {
+  if (dropboxToken && currentUser) {
     setTimeout(() => {
       syncToCloud();
     }, 2000); // Save after 2 seconds of inactivity
@@ -952,10 +1163,14 @@ function renderTickets() {
   
   // Filter tickets
   let filteredTickets = tickets;
-  if (currentFilter === 'available') {
+  if (!currentUser) return;
+
+  if (currentUser.role === 'requester' || currentFilter === 'my-requests') {
+    filteredTickets = tickets.filter(t => t.requester === currentUser.username);
+  } else if (currentFilter === 'available') {
     filteredTickets = tickets.filter(t => t.status === 'available');
   } else if (currentFilter === 'in-progress') {
-    filteredTickets = tickets.filter(t => t.status === 'in-progress' && t.attendant === currentAttendant);
+    filteredTickets = tickets.filter(t => t.status === 'in-progress' && t.attendant === currentUser.username);
   } else if (currentFilter === 'completed') {
     filteredTickets = tickets.filter(t => t.status === 'completed');
   }
@@ -999,7 +1214,7 @@ function renderTickets() {
         
         <div class="ticket-header" style="margin-top: 1.5rem;">
           <div class="ticket-title">${ticket.title}</div>
-          ${status !== 'in-progress' || ticket.attendant === currentAttendant ? `
+          ${(status !== 'in-progress' || ticket.attendant === currentUser.username) || (currentUser && currentUser.isAdmin) ? `
             <div class="ticket-actions">
               <button class="ticket-edit-btn" onclick="editTicket('${ticket.id}')" title="Editar">✎</button>
               <button class="ticket-delete-btn" onclick="deleteTicket('${ticket.id}')" title="Excluir">✕</button>
@@ -1019,10 +1234,11 @@ function renderTickets() {
         
         <div class="ticket-meta">
           <div>🕒 ${ticket.date}</div>
-          ${ticket.attendant ? `<div class="ticket-attendant">👤 ${ticket.attendant}</div>` : ''}
+          ${ticket.requester ? `<div class="ticket-attendant" style="background:var(--surface3);">📝 Solicitante: ${ticket.requester}</div>` : ''}
+          ${ticket.attendant ? `<div class="ticket-attendant">👤 Atendente: ${ticket.attendant}</div>` : ''}
         </div>
         
-        ${actionButtons}
+        ${currentUser && currentUser.role === 'attendant' ? actionButtons : ''}
       </div>
     `;
   }).join('');
@@ -1038,7 +1254,7 @@ function pullTicket(ticketId) {
   }
   
   ticket.status = 'in-progress';
-  ticket.attendant = currentAttendant;
+  ticket.attendant = currentUser.username;
   ticket.startedAt = new Date().toLocaleString('pt-BR');
   
   saveTickets();
@@ -1049,7 +1265,7 @@ function completeTicket(ticketId) {
   const ticket = tickets.find(t => t.id === ticketId);
   if (!ticket) return;
   
-  if (ticket.attendant !== currentAttendant) {
+  if (ticket.attendant !== currentUser.username && (!currentUser || !currentUser.isAdmin)) {
     showSyncNotification('Você não pode concluir este chamado', 'error');
     return;
   }
@@ -1067,7 +1283,7 @@ function releaseTicket(ticketId) {
   const ticket = tickets.find(t => t.id === ticketId);
   if (!ticket) return;
   
-  if (ticket.attendant !== currentAttendant) {
+  if (ticket.attendant !== currentUser.username && (!currentUser || !currentUser.isAdmin)) {
     showSyncNotification('Você não pode devolver este chamado', 'error');
     return;
   }
@@ -1173,6 +1389,7 @@ function saveTicket() {
       date: timestamp,
       createdAt: timestamp,
       status: 'available', // New tickets start as available
+      requester: currentUser ? currentUser.username : 'Desconhecido',
       attendant: null,
       startedAt: null,
       completedAt: null
@@ -1289,11 +1506,12 @@ async function testConnection() {
   try {
     setSyncButtonState('syncing');
     
+    // Dropbox /get_current_account does not take a body, and Content-Type must not be 'application/json' if body is empty or null,
+    // usually we can just omit Content-Type or use application/json and post 'null'
     const response = await fetch('https://api.dropboxapi.com/2/users/get_current_account', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${dropboxToken}`,
-        'Content-Type': 'application/json'
+        'Authorization': `Bearer ${dropboxToken}`
       }
     });
     
@@ -1340,7 +1558,8 @@ async function syncToCloud() {
         notes: {},
         attachments: {},
         roadmap: localStorage.getItem('roadmap-state'),
-        tickets: localStorage.getItem('tickets-eliana')
+        tickets: localStorage.getItem('tickets-eliana'),
+        users: localStorage.getItem('users-eliana') || '[]'
       }
     };
     
@@ -1458,6 +1677,11 @@ async function syncFromCloud() {
         // Restaurar tickets
         if (data.data.tickets) {
           localStorage.setItem('tickets-eliana', data.data.tickets);
+        }
+        
+        // Restaurar usuários
+        if (data.data.users) {
+          localStorage.setItem('users-eliana', data.data.users);
         }
       }
       

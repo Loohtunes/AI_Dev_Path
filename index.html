@@ -211,13 +211,20 @@ console.log("Arquitetura:", myNetwork.layers.join(" → "));
         <div class="login-box">
           <div class="login-icon">🎫</div>
           <h2 class="login-title">Sistema de Chamados</h2>
-          <p class="login-subtitle">Faça login para começar a atender</p>
+          <p class="login-subtitle">Faça login para acessar os chamados</p>
           <div class="login-form">
             <div class="login-input-group">
-              <label class="login-label">👤 Nome do Atendente</label>
+              <label class="login-label">👤 Nome de Usuário</label>
               <input type="text" class="login-input" id="attendant-name" placeholder="Digite seu nome">
             </div>
-            <button class="login-btn" onclick="performLogin()">Entrar no Sistema</button>
+            <div class="login-input-group">
+              <label class="login-label">🔑 Senha</label>
+              <input type="password" class="login-input" id="attendant-pass" placeholder="Digite sua senha">
+            </div>
+            <button class="login-btn" onclick="performLogin()">Entrar</button>
+            <div class="login-actions" style="margin-top: 10px; text-align: center;">
+              <button class="login-btn" id="first-user-btn" style="background: transparent; color: var(--accent2); border: 1px solid var(--accent2); padding: 0.5rem; display: none;" onclick="openUserForm(true)">Criar Primeiro Usuário (Admin)</button>
+            </div>
           </div>
         </div>
       </div>
@@ -228,6 +235,7 @@ console.log("Arquitetura:", myNetwork.layers.join(" → "));
           <p class="page-eyebrow">// Gestão de Atendimento</p>
           <h2 class="page-title">Sistema de <em>Chamados</em></h2>
           <div class="attendant-info">
+            <button id="admin-shield-btn" class="logout-btn" style="background: transparent; border: 1px solid var(--accent3); margin-right: 0.5rem; display: none;" onclick="openUserManagerModal()" title="Gerenciar Usuários">🛡️ Admin</button>
             <span class="attendant-badge">👤 <span id="current-attendant">Atendente</span></span>
             <button class="logout-btn" onclick="performLogout()">Sair</button>
           </div>
@@ -366,6 +374,51 @@ console.log("Arquitetura:", myNetwork.layers.join(" → "));
           <button class="sync-btn sync-btn-danger" onclick="disconnectDropbox()">🔌 Desconectar</button>
         </div>
         <div class="sync-last-sync" id="sync-last-sync"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- USER MODAL (Registration/Management) -->
+  <div class="ticket-modal" id="user-modal" onclick="if(event.target === this) closeUserModal()">
+    <div class="ticket-modal-content">
+      <div class="ticket-modal-header">
+        <div class="ticket-modal-title" id="user-modal-title">Gerenciar Usuários</div>
+        <button class="ticket-modal-close" onclick="closeUserModal()">✕</button>
+      </div>
+      <div class="ticket-modal-body" id="user-modal-body">
+        <!-- List of users (only for admin) -->
+        <div id="user-list-container" style="display:none; margin-bottom: 20px;">
+          <h3 style="margin-bottom: 10px; font-size: 1rem;">Usuários Cadastrados</h3>
+          <div id="users-list" style="max-height: 150px; overflow-y: auto; background: var(--surface2); padding: 10px; border-radius: 8px;"></div>
+          <button class="new-ticket-btn" style="margin-top: 10px; width: 100%;" onclick="showUserForm()">+ Criar Novo Usuário</button>
+        </div>
+        
+        <!-- User Form -->
+        <div id="user-form-container">
+          <div class="ticket-form-group">
+            <label class="ticket-form-label">Nome de Usuário</label>
+            <input type="text" class="ticket-form-input" id="user-name-input" placeholder="Ex: joao.silva">
+          </div>
+          <div class="ticket-form-group">
+            <label class="ticket-form-label">Senha</label>
+            <input type="password" class="ticket-form-input" id="user-pass-input" placeholder="Senha segura">
+          </div>
+          <div class="ticket-form-group" id="user-role-group">
+            <label class="ticket-form-label">Papel do Usuário</label>
+            <select class="ticket-form-input" id="user-role-input" style="background: var(--surface); color: var(--text); border: 1px solid var(--border);" onchange="toggleAdminCheckbox()">
+              <option value="requester">Solicitante</option>
+              <option value="attendant">Atendente</option>
+            </select>
+          </div>
+          <div class="ticket-form-group" id="user-admin-group" style="display: none; align-items: center; gap: 10px; margin-top: 15px;">
+            <input type="checkbox" id="user-admin-input" style="width: 20px; height: 20px; accent-color: var(--accent2);">
+            <label class="ticket-form-label" style="margin-bottom: 0;"> É Administrador?</label>
+          </div>
+        </div>
+      </div>
+      <div class="ticket-modal-footer">
+        <button class="btn-cancel" onclick="closeUserModal()">Cancelar</button>
+        <button class="btn-save" onclick="saveUser()">Salvar Usuário</button>
       </div>
     </div>
   </div>
